@@ -22,13 +22,14 @@ export type HeirKey =
   | 'daughter' | 'granddaughter' | 'mother'
   | 'paternalGrandmother' | 'maternalGrandmother'
   | 'fullSister' | 'paternalSister' | 'maternalSister'
-  | 'wife' | 'freedSlaveFemale';
+  | 'wife' | 'freedSlaveFemale'
+  | 'governmentTreasury';
 
 export interface HeirDefinition {
   id: HeirKey;
   nameEn: string;
   nameAr: string;
-  gender: 'M' | 'F';
+  gender: 'M' | 'F' | 'N';
 }
 
 export interface CalculationResult {
@@ -44,7 +45,7 @@ export interface CalculationResult {
   blockedBy?: string;
   explanation: string;
   quranReference?: string;
-  heirType: 'Sharer' | 'Residuary' | 'Blocked';
+  heirType: 'Sharer' | 'Residuary' | 'Blocked' | 'Treasury';
   fiqhNote?: string;
 }
 

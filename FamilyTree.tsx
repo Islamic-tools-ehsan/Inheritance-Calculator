@@ -43,9 +43,11 @@ export const FamilyTree: React.FC<FamilyTreeProps> = ({ results, deceasedGender 
     unclePaternal: { x: 920, y: 250 },
     cousinFull: { x: 920, y: 800 },
     cousinPaternal: { x: 920, y: 900 },
+    
+    governmentTreasury: { x: 525, y: 880 }
   };
 
-  const activeResults = results.filter(r => r.count > 0 || r.isBlocked);
+  const activeResults = results.filter(r => r.count > 0 || r.isBlocked || r.heirId === 'governmentTreasury');
   
   const sortedHeirs = [...activeResults].sort((a, b) => {
     if (a.isBlocked && !b.isBlocked) return -1;
@@ -68,9 +70,15 @@ export const FamilyTree: React.FC<FamilyTreeProps> = ({ results, deceasedGender 
     const totalShare = !isDeceased && !isBlocked ? `${(heir as CalculationResult).sharePercentage.toFixed(1)}%` : null;
     const perShare = !isDeceased && !isBlocked && count > 1 ? `${(heir as CalculationResult).sharePercentagePerHeir.toFixed(1)}% each` : null;
 
-    const bgColor = isDeceased ? '#1e293b' : isBlocked ? '#fef2f2' : '#f0fdf4';
-    const borderColor = isDeceased ? '#0f172a' : isBlocked ? '#ef4444' : '#22c55e';
-    const textColor = isDeceased ? '#ffffff' : isBlocked ? '#991b1b' : '#166534';
+    let bgColor = isDeceased ? '#1e293b' : isBlocked ? '#fef2f2' : '#f0fdf4';
+    let borderColor = isDeceased ? '#0f172a' : isBlocked ? '#ef4444' : '#22c55e';
+    let textColor = isDeceased ? '#ffffff' : isBlocked ? '#991b1b' : '#166534';
+
+    if (id === 'governmentTreasury') {
+      bgColor = '#fff7ed';
+      borderColor = '#ea580c';
+      textColor = '#9a3412';
+    }
 
     return (
       <g key={id} className="transition-all duration-300 pointer-events-none">
@@ -91,7 +99,7 @@ export const FamilyTree: React.FC<FamilyTreeProps> = ({ results, deceasedGender 
           textAnchor="middle"
           dominantBaseline="middle"
           fill={textColor}
-          className="text-[11px] font-black uppercase tracking-wider"
+          className="text-[10px] font-black uppercase tracking-wider"
         >
           {label.split('(')[0].trim()}
         </text>

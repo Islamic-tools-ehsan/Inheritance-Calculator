@@ -1,6 +1,6 @@
 
 import { HeirKey, CalculationResult, DeceasedGender, InheritanceState, FiqhSchool } from '../types';
-import { ALL_HEIRS } from '../constants';
+import { ALL_HEIRS, i18nStrings } from '../constants';
 
 export const calculateInheritance = (state: InheritanceState): CalculationResult[] => {
   const { 
@@ -10,9 +10,11 @@ export const calculateInheritance = (state: InheritanceState): CalculationResult
     wasiyyat, 
     deceasedGender, 
     heirs, 
-    school 
+    school,
+    language
   } = state;
   
+  const t = i18nStrings[language] || i18nStrings.en;
   let results: CalculationResult[] = [];
 
   const deductions = (funeralExpenses || 0) + (debts || 0) + (wasiyyat || 0);
@@ -100,7 +102,7 @@ export const calculateInheritance = (state: InheritanceState): CalculationResult
   }
 
   let shares: Partial<Record<HeirKey, number>> = {};
-  const categoryMap: Partial<Record<HeirKey, 'Sharer' | 'Residuary'>> = {};
+  const categoryMap: Partial<Record<HeirKey, 'Sharer' | 'Residuary' | 'Treasury'>> = {};
   let totalFurud = 0;
 
   if (activeHeirs.husband > 0 && !blocked.husband) {
@@ -233,7 +235,7 @@ export const calculateInheritance = (state: InheritanceState): CalculationResult
       const share = shares[def.id] || 0;
       results.push({
         heirId: def.id,
-        heirName: `${def.nameEn} (${def.nameAr})`,
+        heirName: `${t.heirs?.[def.id] || def.nameEn} (${def.nameAr})`,
         count,
         shareFraction: formatFraction(share),
         sharePercentage: share * 100,
@@ -244,11 +246,32 @@ export const calculateInheritance = (state: InheritanceState): CalculationResult
         blockedBy: blocked[def.id],
         explanation: getDetailedExplanation(def.id, isHeirBlocked, blocked[def.id], share > 0, categoryMap[def.id], school, isMushtaraka),
         quranReference: getQuranRef(def.id),
-        heirType: isHeirBlocked ? 'Blocked' : (categoryMap[def.id] || 'Sharer'),
+        heirType: isHeirBlocked ? 'Blocked' : (categoryMap[def.id] as any || 'Sharer'),
         fiqhNote: getFiqhNote(def.id, school, activeHeirs)
       });
     }
   });
+
+  const totalDistributed = results.reduce((sum, r) => sum + r.sharePercentage, 0);
+  
+  if (totalDistributed < 99.9 && netEstate > 0) {
+    const remainingShare = 100 - totalDistributed;
+    const remainingRatio = remainingShare / 100;
+
+    results.push({
+      heirId: 'governmentTreasury',
+      heirName: t.heirs?.governmentTreasury || 'Government Treasury (Bait-ul-Maal)',
+      count: 1,
+      shareFraction: formatFraction(remainingRatio),
+      sharePercentage: remainingShare,
+      shareAmount: remainingRatio * netEstate,
+      shareAmountPerHeir: remainingRatio * netEstate,
+      sharePercentagePerHeir: remainingShare,
+      isBlocked: false,
+      explanation: getTreasuryExplanation(school),
+      heirType: 'Treasury'
+    });
+  }
 
   return results;
 };
@@ -280,6 +303,17 @@ const getDetailedExplanation = (id: HeirKey, isBlocked: boolean, blockedBy: stri
   };
 
   return base[id] || `Receives share according to ${school} Fiqh rules for ${id}.`;
+};
+
+const getTreasuryExplanation = (school: FiqhSchool): string => {
+  const schoolNotes: Record<string, string> = {
+    [FiqhSchool.Hanafi]: "The estate goes to the Bait-ul-Maal (Treasury) as the ultimate fallback. In Hanafi Fiqh, this occurs only if no Sharers, Residuaries, or Distant Kindred (Dhawu al-Arham) exist.",
+    [FiqhSchool.Shafi]: "Classical Shafi'i view transfers assets to the Bait-ul-Maal if no heirs are present. Later scholars preferred 'Radd' to relatives if the Treasury is not managed according to Sharia.",
+    [FiqhSchool.Maliki]: "In the Maliki school, the Bait-ul-Maal is considered the final heir for agnatic relatives in the absence of other inheritors.",
+    [FiqhSchool.Hanbali]: "The estate goes to the Bait-ul-Maal as a final resort after exhausting all possible relatives including distant kindred.",
+    [FiqhSchool.General]: "No eligible heirs were found. The remaining estate is transferred to the Government Treasury (Bait-ul-Maal) as per Islamic Law."
+  };
+  return schoolNotes[school] || schoolNotes[FiqhSchool.General];
 };
 
 const getFiqhNote = (id: HeirKey, school: FiqhSchool, activeHeirs: Record<HeirKey, number>): string | undefined => {

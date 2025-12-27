@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { CalculationResult } from './types';
-import { CheckCircle2, AlertCircle, HelpCircle, BookOpen, Scale, List, User } from 'lucide-react';
+import { CheckCircle2, AlertCircle, HelpCircle, BookOpen, Scale, List, Ban } from 'lucide-react';
 
 interface ResultExplanationsProps {
   results: CalculationResult[];
@@ -10,6 +10,7 @@ interface ResultExplanationsProps {
 
 export const ResultExplanations: React.FC<ResultExplanationsProps> = ({ results, t }) => {
   const sharers = results.filter(r => !r.isBlocked && r.shareAmount > 0);
+  const blockedHeirs = results.filter(r => r.isBlocked);
 
   return (
     <div className="space-y-10">
@@ -127,6 +128,51 @@ export const ResultExplanations: React.FC<ResultExplanationsProps> = ({ results,
           ))}
         </div>
       </section>
+
+      {blockedHeirs.length > 0 && (
+        <section className="mt-16">
+          <div className="flex items-center gap-4 mb-8 px-6">
+            <Ban className="text-red-600" size={32} />
+            <h2 className="text-3xl font-black tracking-tight text-red-600 uppercase">Excluded Heirs (Hajb)</h2>
+          </div>
+
+          <div className="grid grid-cols-1 gap-8">
+            {blockedHeirs.map((r, i) => (
+              <div 
+                key={`blocked-${i}`} 
+                className="bg-red-50/50 p-10 rounded-[3rem] shadow-2xl shadow-red-100/40 border border-red-100 transition-all hover:border-red-500/30"
+              >
+                <div className="flex justify-between items-start mb-6">
+                  <div className="flex items-center gap-6">
+                    <div className="bg-red-100 p-4 rounded-[1.5rem] shadow-inner">
+                      <AlertCircle className="text-red-600" size={28} />
+                    </div>
+                    <div>
+                      <h3 className="font-black text-2xl font-arabic text-red-900">{r.heirName}</h3>
+                      <p className="text-[11px] font-black uppercase text-red-500 tracking-widest mt-1">
+                        Status: Fully Excluded
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white p-6 rounded-[2rem] border-2 border-red-100 mb-6">
+                  <p className="text-lg text-red-800 font-bold leading-relaxed">
+                    <span className="text-red-600 underline">Reason:</span> {r.explanation}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-3 px-2">
+                  <div className="w-1.5 h-1.5 bg-red-400 rounded-full"></div>
+                  <p className="text-xs font-black text-red-400 uppercase tracking-widest">
+                    Based on Inheritance Principles (Hajb Al-Hirman)
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 };

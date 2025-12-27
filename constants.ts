@@ -86,7 +86,8 @@ const heirTranslations: Record<string, Record<HeirKey, string>> = {
     daughter: 'Daughter', granddaughter: "Son's daughter", mother: 'Mother',
     paternalGrandmother: 'Paternal grandmother', maternalGrandmother: 'Maternal grandmother',
     fullSister: 'Full sister', paternalSister: 'Paternal sister', maternalSister: 'Maternal sister',
-    wife: 'Wife', freedSlaveFemale: 'Freed female slave'
+    wife: 'Wife', freedSlaveFemale: 'Freed female slave',
+    governmentTreasury: 'Government Treasury (Bait-ul-Maal)'
   },
   ur: {
     son: 'بیٹا', grandson: 'پوتا', father: 'والد', grandfather: 'دادا',
@@ -98,7 +99,8 @@ const heirTranslations: Record<string, Record<HeirKey, string>> = {
     daughter: 'بیٹی', granddaughter: 'پوتی', mother: 'والدہ',
     paternalGrandmother: 'دادی', maternalGrandmother: 'نانی',
     fullSister: 'سگی بہن', paternalSister: 'علاتی بہن', maternalSister: 'اخیافی بہن',
-    wife: 'بیوی', freedSlaveFemale: 'آزاد کردہ لونڈی'
+    wife: 'بیوی', freedSlaveFemale: 'آزاد کردہ لونڈی',
+    governmentTreasury: 'بیت المال'
   },
   ar: {
     son: 'ابن', grandson: 'ابن ابن', father: 'أب', grandfather: 'جد لأب',
@@ -110,7 +112,8 @@ const heirTranslations: Record<string, Record<HeirKey, string>> = {
     daughter: 'بنت', granddaughter: 'بنت ابن', mother: 'أم',
     paternalGrandmother: 'جدة لأب', maternalGrandmother: 'جدة لأم',
     fullSister: 'أخت شقيقة', paternalSister: 'أخت لأب', maternalSister: 'أخت لأم',
-    wife: 'زوجة', freedSlaveFemale: 'معتقة'
+    wife: 'زوجة', freedSlaveFemale: 'معتقة',
+    governmentTreasury: 'بيت المال'
   },
   hi: {
     son: 'बेटा', grandson: 'पोता', father: 'पिता', grandfather: 'दादा',
@@ -122,7 +125,8 @@ const heirTranslations: Record<string, Record<HeirKey, string>> = {
     daughter: 'बेटी', granddaughter: 'पोटी', mother: 'माँ',
     paternalGrandmother: 'दादी', maternalGrandmother: 'नानी',
     fullSister: 'सगी बहन', paternalSister: 'सौतेली बहन (पिता)', maternalSister: 'सौतेली बहन (माता)',
-    wife: 'पत्नी', freedSlaveFemale: 'आज़ाद दासी'
+    wife: 'पत्नी', freedSlaveFemale: 'आज़ाद दासी',
+    governmentTreasury: 'बैतुल माल (सरकारी खजाना)'
   }
 };
 
@@ -140,7 +144,7 @@ export const i18nStrings: Record<string, any> = {
     distributionAmount: 'Amount to Divide',
     funeralExpenses: 'Funeral Expenses',
     debts: 'Debts',
-    wasiyyat: 'Wasiyyat (Will)',
+    wasiyyat: 'Wasiyyat (Will) (UpTo 1/3)',
     wasiyyatLimit: 'Up to 1/3',
     currency: 'Currency',
     fiqhSchool: 'Fiqh School',
@@ -148,6 +152,7 @@ export const i18nStrings: Record<string, any> = {
     deceasedGender: 'Deceased Gender',
     heirsSelection: 'Select Heirs',
     calculate: 'Calculate Shares',
+    recalculate: 'Recalculate',
     reset: 'Start Over',
     results: 'Results',
     shareTable: 'Share Table',
@@ -168,7 +173,7 @@ export const i18nStrings: Record<string, any> = {
     distributionAmount: 'المبلغ للتقسيم',
     funeralExpenses: 'نفقات الجنازة',
     debts: 'الديون',
-    wasiyyat: 'الوصية',
+    wasiyyat: 'الوصية (حتى 1/3)',
     wasiyyatLimit: 'حتى 1/3',
     currency: 'العملة',
     fiqhSchool: 'المذهب',
@@ -176,6 +181,7 @@ export const i18nStrings: Record<string, any> = {
     deceasedGender: 'جنس المتوفى',
     heirsSelection: 'اختر الورثة',
     calculate: 'احسب الأنصبة',
+    recalculate: 'إعادة الحساب',
     reset: 'إعادة ضبط',
     results: 'النتائج',
     shareTable: 'جدول الأنصبة',
@@ -196,7 +202,7 @@ export const i18nStrings: Record<string, any> = {
     distributionAmount: 'تقسیم کی رقم',
     funeralExpenses: 'تجہیز و تکفین',
     debts: 'قرض',
-    wasiyyat: 'وصیت',
+    wasiyyat: 'وصیت (ایک تہائی تک)',
     wasiyyatLimit: 'ایک تہائی تک',
     currency: 'کرنسی',
     fiqhSchool: 'فقہی مسلک',
@@ -204,6 +210,7 @@ export const i18nStrings: Record<string, any> = {
     deceasedGender: 'میت کی جنس',
     heirsSelection: 'وارثین چنیں',
     calculate: 'حصے معلوم کریں',
+    recalculate: 'دوبارہ حساب کریں',
     reset: 'دوبارہ شروع کریں',
     results: 'نتائج',
     shareTable: 'حصص کا ٹیبل',
@@ -224,7 +231,7 @@ export const i18nStrings: Record<string, any> = {
     distributionAmount: 'विभाजित की जाने वाली राशि',
     funeralExpenses: 'अंतिम संस्कार का खर्च',
     debts: 'कर्ज',
-    wasiyyat: 'वसीयत',
+    wasiyyat: 'वसीयत (1/3 तक)',
     wasiyyatLimit: '1/3 तक',
     currency: 'मुद्रा',
     fiqhSchool: 'फ़िक़्ह स्कूल',
@@ -232,6 +239,7 @@ export const i18nStrings: Record<string, any> = {
     deceasedGender: 'मृतक का लिंग',
     heirsSelection: 'वारिस चुनें',
     calculate: 'हिस्से की गणना करें',
+    recalculate: 'पुनः गणना',
     reset: 'पुनः आरंभ करें',
     results: 'परिणाम',
     shareTable: 'हिस्सा तालिका',

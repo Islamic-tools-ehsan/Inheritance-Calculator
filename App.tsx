@@ -19,7 +19,7 @@ import { ResultExplanations } from './ResultExplanations';
 import { 
   Calculator, Users, Globe, Landmark, 
   ArrowRight, RotateCcw, Printer, 
-  Info, Network, Coins, MinusCircle, AlertTriangle, X
+  Info, Network, Coins, MinusCircle, AlertTriangle, X, RefreshCw
 } from 'lucide-react';
 
 const HEIR_LIMITS: Record<string, number> = {
@@ -58,15 +58,29 @@ const App: React.FC = () => {
     return new Set(results.filter(r => r.isBlocked).map(r => r.heirId));
   }, [results]);
 
-  const sortedLanguages = useMemo(() => {
-    const selected = LANGUAGES.find(l => l.code === state.language);
-    const others = LANGUAGES.filter(l => l.code !== state.language);
-    return selected ? [selected, ...others] : LANGUAGES;
-  }, [state.language]);
+  const hasSelectedHeirs = useMemo(() => {
+    return (Object.values(state.heirs) as number[]).some(count => count > 0);
+  }, [state.heirs]);
 
   const triggerError = (msg: string) => {
     setErrorMessage(msg);
     setTimeout(() => setErrorMessage(null), 5000);
+  };
+
+  const resetAll = () => {
+    setState({
+      totalEstate: 0,
+      funeralExpenses: 0,
+      debts: 0,
+      wasiyyat: 0,
+      currency: state.currency,
+      deceasedGender: state.deceasedGender,
+      school: state.school,
+      language: state.language,
+      heirs: {} as Record<HeirKey, number>
+    });
+    setIsCalculated(false);
+    setErrorMessage(null);
   };
 
   const handleHeirChange = (key: HeirKey, value: number) => {
@@ -76,37 +90,47 @@ const App: React.FC = () => {
       return;
     }
     const val = Math.max(0, value);
-    setState(prev => ({
-      ...prev,
-      heirs: { ...prev.heirs, [key]: val }
-    }));
+    
+    setState(prev => {
+      const newHeirs = { ...prev.heirs, [key]: val };
+      const currentlyHasHeirs = (Object.values(newHeirs) as number[]).some(c => c > 0);
+      
+      let updatedWasiyyat = prev.wasiyyat;
+      if (currentlyHasHeirs && prev.wasiyyat > prev.totalEstate / 3) {
+        updatedWasiyyat = 0;
+        triggerError("Wasiyyat reset to 0 because heirs are present (limit is 1/3).");
+      }
+
+      return {
+        ...prev,
+        heirs: newHeirs,
+        wasiyyat: updatedWasiyyat
+      };
+    });
     setIsCalculated(false);
   };
 
   const handleNumericInput = (field: keyof InheritanceState, value: number) => {
     if (value < 0) return;
 
+    if (field === 'totalEstate' && (value === 0 || isNaN(value))) {
+      resetAll();
+      return;
+    }
+
     if (field === 'wasiyyat') {
-      const maxWasiyyat = state.totalEstate / 3;
+      const isHanafi = state.school === FiqhSchool.Hanafi;
+      const limitFactor = (isHanafi && !hasSelectedHeirs) ? 1 : (1/3);
+      const maxWasiyyat = state.totalEstate * limitFactor;
+
       if (value > maxWasiyyat) {
-        triggerError(`Wasiyyat (Will) cannot exceed 1/3 of total estate (${maxWasiyyat.toFixed(2)} ${state.currency}).`);
+        const limitLabel = limitFactor === 1 ? "100%" : "1/3";
+        triggerError(`Wasiyyat cannot exceed ${limitLabel} of estate (${maxWasiyyat.toLocaleString()} ${state.currency}).`);
         return;
       }
     }
 
     setState(prev => ({ ...prev, [field]: value }));
-    setIsCalculated(false);
-  };
-
-  const resetAll = () => {
-    setState({
-      ...state,
-      totalEstate: 0,
-      funeralExpenses: 0,
-      debts: 0,
-      wasiyyat: 0,
-      heirs: {} as Record<HeirKey, number>
-    });
     setIsCalculated(false);
   };
 
@@ -153,7 +177,8 @@ const App: React.FC = () => {
         <input 
           type="number" 
           min="0" 
-          value={count || 0}
+          value={count || ''}
+          placeholder="0"
           disabled={isBlocked}
           onChange={(e) => handleHeirChange(h.id, Number(e.target.value))}
           className={inputClass}
@@ -164,10 +189,17 @@ const App: React.FC = () => {
 
   const renderDeductionInput = (label: string, value: number, field: 'funeralExpenses' | 'debts' | 'wasiyyat', subLabel?: string) => {
     const isFilled = value > 0;
+    const isWasiyyat = field === 'wasiyyat';
+    const isHanafiNoHeirs = isWasiyyat && state.school === FiqhSchool.Hanafi && !hasSelectedHeirs;
+    
     return (
       <div className="flex-1">
-        <label className="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest">
-          {label} {subLabel && <span className="text-red-500 ml-1">({subLabel})</span>}
+        <label className="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest leading-relaxed">
+          {label} {subLabel && (
+            <span className={isHanafiNoHeirs ? "text-emerald-500 ml-1" : "text-red-500 ml-1"}>
+              ({isHanafiNoHeirs ? "Up to 100%" : subLabel})
+            </span>
+          )}
         </label>
         <div className="relative">
           <input 
@@ -187,7 +219,6 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen pb-20 px-4 md:px-8 bg-slate-50 text-slate-900 font-black">
-      {/* Error Popup */}
       {errorMessage && (
         <div className="fixed top-8 left-1/2 -translate-x-1/2 z-[9999] animate-in slide-in-from-top-4 duration-300 w-full max-w-md px-4">
           <div className="bg-red-600 text-white p-5 rounded-[2rem] shadow-2xl flex items-center justify-between gap-4 border-4 border-red-400">
@@ -202,7 +233,6 @@ const App: React.FC = () => {
         </div>
       )}
 
-      {/* Header */}
       <header className="max-w-7xl mx-auto py-8 flex flex-col md:flex-row justify-between items-center gap-6">
         <div className="flex items-center gap-4">
           <div className="bg-orange-600 p-4 rounded-3xl shadow-xl transition-transform hover:scale-105 active:scale-95 cursor-pointer">
@@ -237,7 +267,7 @@ const App: React.FC = () => {
               onChange={(e) => setState({...state, language: e.target.value})}
               className="bg-transparent border-none text-[10px] md:text-sm font-black focus:ring-0 w-full cursor-pointer pr-4"
             >
-              {sortedLanguages.map(l => <option key={l.code} value={l.code} className="font-sans">{l.name}</option>)}
+              {LANGUAGES.map(l => <option key={l.code} value={l.code} className="font-sans">{l.name}</option>)}
             </select>
           </div>
         </div>
@@ -245,6 +275,7 @@ const App: React.FC = () => {
 
       <main className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
         <div className="lg:col-span-5 space-y-8 no-print">
+          {/* Section 1: Summary */}
           <section className="bg-white p-6 md:p-10 rounded-[3rem] shadow-2xl shadow-slate-200/50 border border-slate-100">
             <h2 className="text-2xl font-black mb-8 flex items-center gap-4">
               <Calculator className="text-orange-600" size={28} />
@@ -310,18 +341,7 @@ const App: React.FC = () => {
             </div>
           </section>
 
-          <section className="bg-white p-6 md:p-10 rounded-[3rem] shadow-2xl shadow-slate-200/50 border border-slate-100">
-            <h2 className="text-2xl font-black mb-8 flex items-center gap-4">
-              <MinusCircle className="text-red-500" size={28} />
-              {t.deductions}
-            </h2>
-            <div className="space-y-6">
-              {renderDeductionInput(t.funeralExpenses, state.funeralExpenses, 'funeralExpenses')}
-              {renderDeductionInput(t.debts, state.debts, 'debts')}
-              {renderDeductionInput(t.wasiyyat, state.wasiyyat, 'wasiyyat', t.wasiyyatLimit)}
-            </div>
-          </section>
-
+          {/* Section 2: Heirs Selection (Now above Deductions) */}
           <section className="bg-white p-6 md:p-10 rounded-[3rem] shadow-2xl shadow-slate-200/50 border border-slate-100">
             <h2 className="text-2xl font-black mb-10 flex items-center gap-4">
               <Users className="text-orange-600" size={28} />
@@ -337,23 +357,39 @@ const App: React.FC = () => {
                 .filter(h => h.id !== 'husband' && h.id !== 'wife' && h.id !== 'freedSlaveMale' && h.id !== 'freedSlaveFemale')
                 .map(renderHeirInput)}
             </div>
+          </section>
 
-            <div className="mt-12 flex gap-4 md:gap-6">
-              <button 
-                onClick={() => setIsCalculated(true)}
-                className="flex-[2] bg-orange-600 hover:bg-orange-700 text-white font-black py-5 md:py-7 px-6 md:px-10 rounded-[2.5rem] shadow-2xl shadow-orange-500/30 transition-all flex items-center justify-center gap-3 group active:scale-95"
-              >
-                <span className="text-md md:text-xl">{t.calculate}</span>
-                <ArrowRight size={28} className="group-hover:translate-x-3 transition-transform" />
-              </button>
-              <button 
-                onClick={resetAll}
-                className="flex-1 bg-slate-100 hover:bg-slate-200 rounded-[2.5rem] transition-all flex items-center justify-center active:scale-90"
-              >
-                <RotateCcw size={28} className="text-slate-500" />
-              </button>
+          {/* Section 3: Deductions (3 Fields) */}
+          <section className="bg-white p-6 md:p-10 rounded-[3rem] shadow-2xl shadow-slate-200/50 border border-slate-100">
+            <h2 className="text-2xl font-black mb-8 flex items-center gap-4">
+              <MinusCircle className="text-red-500" size={28} />
+              {t.deductions}
+            </h2>
+            <div className="space-y-6">
+              {renderDeductionInput(t.funeralExpenses, state.funeralExpenses, 'funeralExpenses')}
+              {renderDeductionInput(t.debts, state.debts, 'debts')}
+              {renderDeductionInput(t.wasiyyat, state.wasiyyat, 'wasiyyat', t.wasiyyatLimit)}
             </div>
           </section>
+
+          {/* Action Buttons at the very bottom */}
+          <div className="flex flex-col sm:flex-row gap-4 md:gap-6 no-print">
+            <button 
+              onClick={() => setIsCalculated(true)}
+              className="flex-[2] bg-orange-600 hover:bg-orange-700 text-white font-black py-5 md:py-7 px-6 md:px-10 rounded-[2.5rem] shadow-2xl shadow-orange-500/30 transition-all flex items-center justify-center gap-3 group active:scale-95"
+            >
+              <span className="text-md md:text-xl">{t.calculate}</span>
+              <ArrowRight size={28} className="group-hover:translate-x-3 transition-transform" />
+            </button>
+            
+            <button 
+              onClick={resetAll}
+              className="flex-1 bg-slate-800 hover:bg-slate-900 text-white font-black py-5 md:py-7 px-6 md:px-10 rounded-[2.5rem] shadow-2xl shadow-slate-900/30 transition-all flex items-center justify-center gap-3 group active:scale-95"
+            >
+              <RefreshCw size={24} className="group-hover:rotate-180 transition-transform duration-500" />
+              <span className="text-md md:text-lg">{t.recalculate}</span>
+            </button>
+          </div>
         </div>
 
         <div className="lg:col-span-7 space-y-10">
