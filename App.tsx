@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { 
   InheritanceState, 
@@ -73,6 +74,7 @@ const App: React.FC = () => {
     });
   }, [state.currency, state.language, t.currencies]);
 
+  // Reactive Results for Blocking Logic
   const results = useMemo(() => {
     return calculateInheritance(state);
   }, [state]);
@@ -113,7 +115,7 @@ const App: React.FC = () => {
       ...prev,
       heirs: { ...prev.heirs, [key]: val }
     }));
-    setIsCalculated(false);
+    // We don't force setIsCalculated(false) anymore to allow real-time blocking feedback
   };
 
   const handleNumericInput = (field: keyof InheritanceState, value: number) => {
@@ -121,6 +123,11 @@ const App: React.FC = () => {
     if (field === 'totalEstate' && (value === 0 || isNaN(value))) {
       resetAll();
       return;
+    }
+    // Wasiyyat 1/3 Limit Check
+    if (field === 'wasiyyat' && value > state.totalEstate / 3) {
+       triggerError(t.wasiyyatLimit);
+       return;
     }
     setState(prev => ({ ...prev, [field]: value }));
     setIsCalculated(false);
@@ -130,8 +137,26 @@ const App: React.FC = () => {
     window.print();
   };
 
+  // Define renderDeductionInput to fix "Cannot find name 'renderDeductionInput'" errors
+  const renderDeductionInput = (label: string, value: number, field: keyof InheritanceState) => (
+    <div key={field}>
+      <label className="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest">{label}</label>
+      <div className="relative">
+        <input 
+          type="number" 
+          value={value || ''} 
+          placeholder="0"
+          onChange={(e) => handleNumericInput(field, Number(e.target.value))}
+          className={`w-full border-4 rounded-[2rem] py-3 md:py-4 px-4 md:px-8 font-black text-lg md:text-xl outline-none transition-all placeholder-slate-300 shadow-inner ${value > 0 ? 'bg-red-50 border-red-500 text-red-700' : 'bg-slate-50 border-slate-100 focus:border-red-500'}`}
+        />
+        <div className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 font-black text-sm md:text-xl opacity-60 pointer-events-none text-slate-400">
+          {CURRENCIES.find(c => c.code === state.currency)?.symbol || '$'}
+        </div>
+      </div>
+    </div>
+  );
+
   const renderHeirInput = (h: any) => {
-    // Hide Husband if deceased is Male, Hide Wife if deceased is Female
     if (h.id === 'husband' && state.deceasedGender === DeceasedGender.Male) return null;
     if (h.id === 'wife' && state.deceasedGender === DeceasedGender.Female) return null;
 
@@ -159,46 +184,27 @@ const App: React.FC = () => {
     }
 
     const translatedName = t.heirs?.[h.id] || h.nameEn;
-    const limitDisplay = HEIR_LIMITS[h.id] ? `(0-${HEIR_LIMITS[h.id]})` : '';
+    const limitDisplay = HEIR_LIMITS[h.id] ? `(0-${HEIR_LIMITS[h.id]})` : `(0-100)`;
 
     return (
       <div key={h.id} className={containerClass}>
         <label className={labelClass}>
           {translatedName} {limitDisplay}
-          {isBlocked && blocker && <span className="block text-[8px] mt-1 font-black">({t.blockedBy} {blocker})</span>}
+          {isBlocked && blocker && (
+            <span className="block text-[8px] mt-1 font-black text-red-600 animate-pulse">
+              {t.blockedBy} {blocker}
+            </span>
+          )}
         </label>
         <input 
           type="number" 
           min="0" 
-          value={count || ''}
+          value={isBlocked ? '' : (count || '')}
           placeholder="0"
           disabled={isBlocked}
           onChange={(e) => handleHeirChange(h.id, Number(e.target.value))}
           className={inputClass}
         />
-      </div>
-    );
-  };
-
-  const renderDeductionInput = (label: string, value: number, field: 'funeralExpenses' | 'debts' | 'wasiyyat') => {
-    const isFilled = value > 0;
-    return (
-      <div className="flex-1">
-        <label className="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest leading-relaxed">
-          {label}
-        </label>
-        <div className="relative">
-          <input 
-            type="number" 
-            value={value || ''} 
-            placeholder="0"
-            onChange={(e) => handleNumericInput(field, Number(e.target.value))}
-            className={`w-full border-4 rounded-[1.5rem] py-3 md:py-4 px-4 md:px-6 font-black text-lg md:text-xl outline-none transition-all placeholder-slate-300 shadow-inner ${isFilled ? 'bg-green-50 border-green-500 text-green-700' : 'bg-slate-50 border-slate-100 focus:border-red-500'}`}
-          />
-          <div className={`absolute right-4 top-1/2 -translate-y-1/2 font-black text-sm opacity-60 pointer-events-none ${isFilled ? 'text-emerald-500' : 'text-slate-400'}`}>
-            {CURRENCIES.find(c => c.code === state.currency)?.symbol || '$'}
-          </div>
-        </div>
       </div>
     );
   };
@@ -343,9 +349,9 @@ const App: React.FC = () => {
               {t.heirsSelection}
             </h2>
             <div className="grid grid-cols-2 gap-4 md:gap-6">
-              {/* Force Spouse Filtering */}
-              {state.deceasedGender === DeceasedGender.Female && MALE_HEIRS.filter(h => h.id === 'husband').map(renderHeirInput)}
-              {state.deceasedGender === DeceasedGender.Male && FEMALE_HEIRS.filter(h => h.id === 'wife').map(renderHeirInput)}
+              {/* Spouses filter */}
+              {MALE_HEIRS.filter(h => h.id === 'husband').map(renderHeirInput)}
+              {FEMALE_HEIRS.filter(h => h.id === 'wife').map(renderHeirInput)}
               
               {[...MALE_HEIRS, ...FEMALE_HEIRS]
                 .filter(h => h.id !== 'husband' && h.id !== 'wife' && h.id !== 'freedSlaveMale' && h.id !== 'freedSlaveFemale')
@@ -382,7 +388,7 @@ const App: React.FC = () => {
             </div>
           ) : (
             <div className="space-y-10 animate-in fade-in slide-in-from-bottom-10 duration-500 print-container">
-              {/* PAGE 1: HEADER & SUMMARY */}
+              {/* Results blocks same as before... */}
               <div className="bg-white p-6 md:p-10 rounded-[3.5rem] shadow-2xl border border-slate-100 overflow-hidden page-break-after">
                 <div className="print-only mb-10 text-center border-b-4 border-orange-600 pb-8">
                   <h1 className="text-4xl font-black font-arabic">{t.title}</h1>
@@ -425,8 +431,7 @@ const App: React.FC = () => {
                 </div>
               </div>
 
-              {/* PAGE 2: FAMILY TREE */}
-              <div className="bg-white p-6 md:p-10 rounded-[3.5rem] shadow-2xl border border-slate-100 page-break-after">
+              <div className="bg-white p-6 md:p-10 rounded-[3.5rem] shadow-2xl border border-slate-100 page-break-before page-break-after">
                 <h2 className="text-2xl font-black mb-10 flex items-center gap-4">
                   <Network className="text-blue-500" size={28} />
                   {t.familyTree}
@@ -434,10 +439,10 @@ const App: React.FC = () => {
                 <FamilyTree results={results} deceasedGender={state.deceasedGender} currency={state.currency} language={state.language} />
               </div>
 
-              {/* PAGE 3: SHARE TABLE & EXPLANATIONS */}
-              <ResultExplanations results={results} t={t} />
+              <div className="page-break-before">
+                <ResultExplanations results={results} t={t} />
+              </div>
 
-              {/* CTA & PDF EXPORT SECTION (VISIBLE ONLY ON SCREEN) */}
               <div className="mt-12 space-y-8 no-print">
                 <div className="bg-gradient-to-r from-emerald-600 to-teal-700 p-10 md:p-14 rounded-[4rem] text-white shadow-3xl flex flex-col items-center text-center group">
                   <div className="bg-white/20 p-6 rounded-full mb-8 backdrop-blur-md group-hover:scale-110 transition-transform">
@@ -469,7 +474,6 @@ const App: React.FC = () => {
                 </div>
               </div>
 
-              {/* PRINT ONLY: CERTIFICATION BLOCK (LAST PAGE) */}
               <div className="print-only mt-20 pt-20 border-t-2 border-slate-200 page-break-before">
                 <div className="flex justify-between gap-20">
                   <div className="flex-1 text-center">

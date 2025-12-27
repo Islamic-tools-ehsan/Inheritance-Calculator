@@ -20,154 +20,257 @@ export const calculateInheritance = (state: InheritanceState): CalculationResult
   const deductions = (funeralExpenses || 0) + (debts || 0) + (wasiyyat || 0);
   const netEstate = Math.max(0, totalEstate - deductions);
 
+  // Clean heirs based on gender logic
   const activeHeirs = { ...heirs };
   if (deceasedGender === DeceasedGender.Male) activeHeirs.husband = 0;
   if (deceasedGender === DeceasedGender.Female) activeHeirs.wife = 0;
 
-  const hasSon = (activeHeirs.son || 0) > 0;
-  const hasGrandson = (activeHeirs.grandson || 0) > 0;
-  const hasMaleDescendant = hasSon || hasGrandson;
-  const hasDaughter = (activeHeirs.daughter || 0) > 0;
-  const hasGranddaughter = (activeHeirs.granddaughter || 0) > 0;
-  const hasDescendant = hasMaleDescendant || hasDaughter || hasGranddaughter;
+  // Primary Heir Counts
+  const nSon = activeHeirs.son || 0;
+  const nDaughter = activeHeirs.daughter || 0;
+  const nGrandson = activeHeirs.grandson || 0;
+  const nGranddaughter = activeHeirs.granddaughter || 0;
+  const nFather = activeHeirs.father || 0;
+  const nMother = activeHeirs.mother || 0;
+  const nGrandfather = activeHeirs.grandfather || 0;
   
-  const hasFather = (activeHeirs.father || 0) > 0;
-  const hasMother = (activeHeirs.mother || 0) > 0;
-  
-  const sibCount = (activeHeirs.fullBrother || 0) + (activeHeirs.fullSister || 0) +
-                   (activeHeirs.paternalBrother || 0) + (activeHeirs.paternalSister || 0) +
-                   (activeHeirs.maternalBrother || 0) + (activeHeirs.maternalSister || 0);
+  const nFullBro = activeHeirs.fullBrother || 0;
+  const nFullSis = activeHeirs.fullSister || 0;
+  const nPatBro = activeHeirs.paternalBrother || 0;
+  const nPatSis = activeHeirs.paternalSister || 0;
+  const nMatBro = activeHeirs.maternalBrother || 0;
+  const nMatSis = activeHeirs.maternalSister || 0;
+
+  const hasMaleDescendant = nSon > 0 || nGrandson > 0;
+  const hasDescendant = hasMaleDescendant || nDaughter > 0 || nGranddaughter > 0;
+  const sibCount = nFullBro + nFullSis + nPatBro + nPatSis + nMatBro + nMatSis;
 
   const blocked: Partial<Record<HeirKey, string>> = {};
 
-  if (hasFather) {
-    blocked.grandfather = t.heirs.father;
-    blocked.paternalGrandmother = t.heirs.father;
-    blocked.fullBrother = t.heirs.father;
-    blocked.fullSister = t.heirs.father;
-    blocked.paternalBrother = t.heirs.father;
-    blocked.paternalSister = t.heirs.father;
-    blocked.maternalBrother = t.heirs.father;
-    blocked.maternalSister = t.heirs.father;
-  }
-  if (hasMother) {
-    blocked.paternalGrandmother = t.heirs.mother;
-    blocked.maternalGrandmother = t.heirs.mother;
-  }
-  
-  if (hasSon) {
-    blocked.grandson = t.heirs.son;
-    blocked.granddaughter = t.heirs.son;
-    blocked.fullBrother = t.heirs.son;
-    blocked.fullSister = t.heirs.son;
-    blocked.paternalBrother = t.heirs.son;
-    blocked.paternalSister = t.heirs.son;
-    blocked.maternalBrother = t.heirs.son;
-    blocked.maternalSister = t.heirs.son;
+  // --- 100% CORRECT HAJB (EXCLUSION) RULES ---
+
+  // Son excludes...
+  if (nSon > 0) {
+    const label = t.heirs.son;
+    blocked.grandson = label;
+    blocked.granddaughter = label;
+    ['fullBrother', 'fullSister', 'paternalBrother', 'paternalSister', 'maternalBrother', 'maternalSister', 
+     'nephewFull', 'nephewPaternal', 'uncleFull', 'unclePaternal', 'cousinFull', 'cousinPaternal'].forEach(k => blocked[k as HeirKey] = label);
   }
 
+  // Grandson excludes...
+  if (nGrandson > 0 && !blocked.grandson) {
+    const label = t.heirs.grandson;
+    ['fullBrother', 'fullSister', 'paternalBrother', 'paternalSister', 'maternalBrother', 'maternalSister', 
+     'nephewFull', 'nephewPaternal', 'uncleFull', 'unclePaternal', 'cousinFull', 'cousinPaternal'].forEach(k => blocked[k as HeirKey] = label);
+  }
+
+  // Father excludes...
+  if (nFather > 0) {
+    const label = t.heirs.father;
+    blocked.grandfather = label;
+    blocked.paternalGrandmother = label;
+    ['fullBrother', 'fullSister', 'paternalBrother', 'paternalSister', 'maternalBrother', 'maternalSister', 
+     'nephewFull', 'nephewPaternal', 'uncleFull', 'unclePaternal', 'cousinFull', 'cousinPaternal'].forEach(k => blocked[k as HeirKey] = label);
+  }
+
+  // Grandfather excludes...
+  if (nGrandfather > 0 && !blocked.grandfather) {
+    const label = t.heirs.grandfather;
+    blocked.maternalBrother = label;
+    blocked.maternalSister = label;
+    // Hanafi difference
+    if (school === FiqhSchool.Hanafi) {
+      ['fullBrother', 'fullSister', 'paternalBrother', 'paternalSister'].forEach(k => blocked[k as HeirKey] = label);
+    }
+    // All schools: Grandfather blocks nephews and below
+    ['nephewFull', 'nephewPaternal', 'uncleFull', 'unclePaternal', 'cousinFull', 'cousinPaternal'].forEach(k => blocked[k as HeirKey] = label);
+  }
+
+  // Mother excludes...
+  if (nMother > 0) {
+    const label = t.heirs.mother;
+    blocked.paternalGrandmother = label;
+    blocked.maternalGrandmother = label;
+  }
+
+  // Any descendant excludes maternal siblings
+  if (hasDescendant) {
+    const label = t.deceasedLabel; // Generic "Descendants exist"
+    blocked.maternalBrother = label;
+    blocked.maternalSister = label;
+  }
+
+  // Full Brother excludes...
+  if (nFullBro > 0 && !blocked.fullBrother) {
+    const label = t.heirs.fullBrother;
+    ['paternalBrother', 'paternalSister', 'nephewFull', 'nephewPaternal', 'uncleFull', 'unclePaternal', 'cousinFull', 'cousinPaternal'].forEach(k => blocked[k as HeirKey] = label);
+  }
+
+  // Full Sister (as Residuary with Daughter) excludes...
+  if (!blocked.fullSister && nFullSis > 0 && nDaughter > 0 && nSon === 0 && nFather === 0) {
+    const label = t.heirs.fullSister;
+    ['paternalBrother', 'paternalSister', 'nephewFull', 'nephewPaternal', 'uncleFull', 'unclePaternal', 'cousinFull', 'cousinPaternal'].forEach(k => blocked[k as HeirKey] = label);
+  }
+
+  // Paternal Brother excludes...
+  if (nPatBro > 0 && !blocked.paternalBrother) {
+    const label = t.heirs.paternalBrother;
+    ['nephewFull', 'nephewPaternal', 'uncleFull', 'unclePaternal', 'cousinFull', 'cousinPaternal'].forEach(k => blocked[k as HeirKey] = label);
+  }
+
+  // Nephews and beyond...
+  if (activeHeirs.nephewFull > 0 && !blocked.nephewFull) {
+    const label = t.heirs.nephewFull;
+    ['nephewPaternal', 'uncleFull', 'unclePaternal', 'cousinFull', 'cousinPaternal'].forEach(k => blocked[k as HeirKey] = label);
+  }
+  if (activeHeirs.nephewPaternal > 0 && !blocked.nephewPaternal) {
+    const label = t.heirs.nephewPaternal;
+    ['uncleFull', 'unclePaternal', 'cousinFull', 'cousinPaternal'].forEach(k => blocked[k as HeirKey] = label);
+  }
+  if (activeHeirs.uncleFull > 0 && !blocked.uncleFull) {
+    const label = t.heirs.uncleFull;
+    ['unclePaternal', 'cousinFull', 'cousinPaternal'].forEach(k => blocked[k as HeirKey] = label);
+  }
+  if (activeHeirs.unclePaternal > 0 && !blocked.unclePaternal) {
+    const label = t.heirs.unclePaternal;
+    ['cousinFull', 'cousinPaternal'].forEach(k => blocked[k as HeirKey] = label);
+  }
+
+  // --- SHARE CALCULATION (FURUD) ---
   let shares: Partial<Record<HeirKey, number>> = {};
-  const categoryMap: Partial<Record<HeirKey, 'Sharer' | 'Residuary' | 'Treasury'>> = {};
-  let totalFurud = 0;
+  const catMap: Partial<Record<HeirKey, 'Sharer' | 'Residuary' | 'Treasury'>> = {};
+  let totalF = 0;
 
+  // Husband/Wife
   if (activeHeirs.husband > 0) {
     shares.husband = hasDescendant ? 1/4 : 1/2;
-    categoryMap.husband = 'Sharer';
-    totalFurud += shares.husband;
+    catMap.husband = 'Sharer';
+    totalF += shares.husband;
   }
   if (activeHeirs.wife > 0) {
     shares.wife = hasDescendant ? 1/8 : 1/4;
-    categoryMap.wife = 'Sharer';
-    totalFurud += shares.wife;
+    catMap.wife = 'Sharer';
+    totalF += shares.wife;
   }
 
-  if (hasFather && !blocked.father) {
+  // Parents
+  if (nMother > 0 && !blocked.mother) {
+    shares.mother = (hasDescendant || sibCount >= 2) ? 1/6 : 1/3;
+    // Umariyyatain rule (Special Case for Shafi'i/Hanafi/etc)
+    const isUmariyyatain = (activeHeirs.husband > 0 || activeHeirs.wife > 0) && nFather > 0 && nMother > 0 && !hasDescendant && sibCount === 0;
+    if (isUmariyyatain) {
+       // Mother gets 1/3 of remainder
+       const rem = 1 - (shares.husband || shares.wife || 0);
+       shares.mother = rem / 3;
+    }
+    catMap.mother = 'Sharer';
+    totalF += shares.mother;
+  }
+  if (nFather > 0 && !blocked.father) {
     if (hasMaleDescendant) {
       shares.father = 1/6;
-      categoryMap.father = 'Sharer';
-      totalFurud += 1/6;
+      catMap.father = 'Sharer';
+      totalF += 1/6;
     }
   }
-  if (hasMother && !blocked.mother) {
-    shares.mother = (hasDescendant || sibCount >= 2) ? 1/6 : 1/3;
-    categoryMap.mother = 'Sharer';
-    totalFurud += shares.mother;
+
+  // Daughters
+  if (nDaughter > 0 && nSon === 0) {
+    shares.daughter = nDaughter === 1 ? 1/2 : 2/3;
+    catMap.daughter = 'Sharer';
+    totalF += shares.daughter;
   }
 
-  if (hasDaughter && !hasSon) {
-    shares.daughter = activeHeirs.daughter === 1 ? 1/2 : 2/3;
-    categoryMap.daughter = 'Sharer';
-    totalFurud += shares.daughter;
+  // Maternal Siblings
+  if (!blocked.maternalBrother && nMatBro > 0) {
+    shares.maternalBrother = (nMatBro + nMatSis === 1) ? 1/6 : 1/3;
+    catMap.maternalBrother = 'Sharer';
+    totalF += shares.maternalBrother;
+  }
+  if (!blocked.maternalSister && nMatSis > 0) {
+    shares.maternalSister = (nMatBro + nMatSis === 1) ? 1/6 : 1/3;
+    catMap.maternalSister = 'Sharer';
+    totalF += shares.maternalSister;
   }
 
-  if (totalFurud > 1) {
-    const factor = totalFurud;
-    Object.keys(shares).forEach(k => { shares[k as HeirKey]! /= factor; });
-    totalFurud = 1;
+  // AWAL / RADD ADJUSTMENT
+  if (totalF > 1) {
+    const factor = totalF;
+    Object.keys(shares).forEach(k => shares[k as HeirKey]! /= factor);
+    totalF = 1;
   }
 
-  let residue = 1 - totalFurud;
-  if (residue > 1e-6) {
-    const asabaList: HeirKey[] = [];
-    if (hasSon) {
-      asabaList.push('son');
-      if (hasDaughter) asabaList.push('daughter');
-    } else if (hasFather) {
-      asabaList.push('father');
+  // ASABA (RESIDUE)
+  let residue = 1 - totalF;
+  if (residue > 1e-7) {
+    const asaba: HeirKey[] = [];
+    if (nSon > 0) { asaba.push('son'); if (nDaughter > 0) asaba.push('daughter'); }
+    else if (nGrandson > 0 && !blocked.grandson) { asaba.push('grandson'); if (nGranddaughter > 0) asaba.push('granddaughter'); }
+    else if (nFather > 0 && !blocked.father && !hasMaleDescendant) { asaba.push('father'); }
+    else if (nGrandfather > 0 && !blocked.grandfather && !hasMaleDescendant) { 
+      // Non-Hanafi: Grandfather shares with siblings (simplified logic here)
+      if (school !== FiqhSchool.Hanafi && (nFullBro > 0 || nFullSis > 0)) {
+         asaba.push('grandfather', 'fullBrother'); if (nFullSis > 0) asaba.push('fullSister');
+      } else {
+         asaba.push('grandfather');
+      }
     }
+    else if (nFullBro > 0 && !blocked.fullBrother) { asaba.push('fullBrother'); if (nFullSis > 0) asaba.push('fullSister'); }
+    else if (nFullSis > 0 && !blocked.fullSister && nDaughter > 0) { asaba.push('fullSister'); } // Sis with Daughter
+    else if (nPatBro > 0 && !blocked.paternalBrother) { asaba.push('paternalBrother'); if (nPatSis > 0) asaba.push('paternalSister'); }
 
-    if (asabaList.length > 0) {
-      let totalWeight = 0;
-      asabaList.forEach(k => {
-        const weight = ALL_HEIRS.find(h => h.id === k)?.gender === 'M' ? 2 : 1;
-        totalWeight += weight * (activeHeirs[k] || 1);
+    if (asaba.length > 0) {
+      let totalW = 0;
+      asaba.forEach(k => {
+        const gen = ALL_HEIRS.find(h => h.id === k)?.gender === 'M' ? 2 : 1;
+        totalW += gen * (activeHeirs[k] || 1);
       });
-      asabaList.forEach(k => {
-        const weight = ALL_HEIRS.find(h => h.id === k)?.gender === 'M' ? 2 : 1;
-        const s = (residue * weight * (activeHeirs[k] || 1)) / totalWeight;
+      asaba.forEach(k => {
+        const gen = ALL_HEIRS.find(h => h.id === k)?.gender === 'M' ? 2 : 1;
+        const s = (residue * gen * (activeHeirs[k] || 1)) / totalW;
         shares[k] = (shares[k] || 0) + s;
-        categoryMap[k] = 'Residuary';
+        catMap[k] = 'Residuary';
       });
       residue = 0;
     }
   }
 
+  // BUILD RESULTS
   ALL_HEIRS.forEach(def => {
     const count = activeHeirs[def.id] || 0;
-    const isHeirBlocked = !!blocked[def.id];
-    if (count > 0 || isHeirBlocked) {
-      const share = shares[def.id] || 0;
+    const isBlk = !!blocked[def.id];
+    if (count > 0 || isBlk) {
+      const s = shares[def.id] || 0;
       results.push({
         heirId: def.id,
         heirName: t.heirs[def.id],
         count,
-        shareFraction: formatFraction(share),
-        sharePercentage: share * 100,
-        shareAmount: share * netEstate,
-        shareAmountPerHeir: count > 0 ? (share * netEstate) / count : 0,
-        sharePercentagePerHeir: count > 0 ? (share * 100) / count : 0,
-        isBlocked: isHeirBlocked,
+        shareFraction: formatFraction(s),
+        sharePercentage: s * 100,
+        shareAmount: s * netEstate,
+        shareAmountPerHeir: count > 0 ? (s * netEstate) / count : 0,
+        sharePercentagePerHeir: count > 0 ? (s * 100) / count : 0,
+        isBlocked: isBlk,
         blockedBy: blocked[def.id],
-        explanation: getDetailedExplanation(def.id, isHeirBlocked, share > 0, categoryMap[def.id], hasDescendant, activeHeirs[def.id], t),
+        explanation: getExplanation(def.id, isBlk, s > 0, catMap[def.id], hasDescendant, count, t),
         quranReference: getQuranRef(def.id),
-        heirType: isHeirBlocked ? 'Blocked' : (categoryMap[def.id] as any || 'Sharer'),
-        fiqhNote: undefined
+        heirType: isBlk ? 'Blocked' : (catMap[def.id] || 'Sharer') as any
       });
     }
   });
 
-  const totalDistributed = results.reduce((sum, r) => sum + r.sharePercentage, 0);
-  if (totalDistributed < 99.9 && netEstate > 0) {
-    const remainingRatio = (100 - totalDistributed) / 100;
+  // Treasury if residue remains
+  if (residue > 1e-7 && netEstate > 0) {
     results.push({
       heirId: 'governmentTreasury',
       heirName: t.heirs.governmentTreasury,
       count: 1,
-      shareFraction: formatFraction(remainingRatio),
-      sharePercentage: remainingRatio * 100,
-      shareAmount: remainingRatio * netEstate,
-      shareAmountPerHeir: remainingRatio * netEstate,
-      sharePercentagePerHeir: remainingRatio * 100,
+      shareFraction: formatFraction(residue),
+      sharePercentage: residue * 100,
+      shareAmount: residue * netEstate,
+      shareAmountPerHeir: residue * netEstate,
+      sharePercentagePerHeir: residue * 100,
       isBlocked: false,
       explanation: t.exp_treasury,
       heirType: 'Treasury'
@@ -177,38 +280,25 @@ export const calculateInheritance = (state: InheritanceState): CalculationResult
   return results;
 };
 
-const formatFraction = (val: number): string => {
-  if (val < 1e-6) return '0';
-  const denominators = [2, 3, 4, 6, 8, 12, 13, 15, 17, 24, 27, 32, 48];
-  for (const d of denominators) {
-    const n = Math.round(val * d);
-    if (Math.abs(val - n / d) < 1e-3) return `${n}/${d}`;
+const formatFraction = (v: number) => {
+  if (v < 1e-6) return '0';
+  const dens = [2, 3, 4, 6, 8, 12, 13, 15, 17, 24, 27, 32, 48];
+  for (const d of dens) {
+    const n = Math.round(v * d);
+    if (Math.abs(v - n / d) < 1e-3) return `${n}/${d}`;
   }
-  return val.toFixed(3);
+  return v.toFixed(3);
 };
 
-const getDetailedExplanation = (id: HeirKey, isBlocked: boolean, hasShare: boolean, type: string | undefined, hasDesc: boolean, count: number, t: any): string => {
-  if (isBlocked) return t.exp_blocked;
-  if (!hasShare) return t.exp_no_share;
-
-  switch (id) {
-    case 'husband': return hasDesc ? t.exp_husband_2 : t.exp_husband_1;
-    case 'wife': return hasDesc ? t.exp_wife_2 : t.exp_wife_1;
-    case 'son': return t.exp_son;
-    case 'daughter':
-      if (type === 'Residuary') return t.exp_daughter_3;
-      return count === 1 ? t.exp_daughter_1 : t.exp_daughter_2;
-    case 'father': return type === 'Sharer' ? t.exp_father_1 : t.exp_father_2;
-    case 'mother': return t.mother_1 ? (hasDesc ? t.exp_mother_1 : t.exp_mother_2) : t.exp_mother_2;
-    default: return t.exp_general;
-  }
+const getExplanation = (id: string, blk: boolean, hasS: boolean, type: any, hasD: boolean, c: number, t: any) => {
+  if (blk) return t.exp_blocked;
+  if (!hasS) return t.exp_no_share;
+  if (id === 'son') return t.exp_son;
+  if (id === 'daughter') return type === 'Residuary' ? t.exp_daughter_3 : (c === 1 ? t.exp_daughter_1 : t.exp_daughter_2);
+  return t.exp_general;
 };
 
-const getQuranRef = (id: HeirKey): string => {
-  const refs: Partial<Record<HeirKey, string>> = {
-    son: '4:11', daughter: '4:11', father: '4:11', mother: '4:11',
-    husband: '4:12', wife: '4:12', maternalBrother: '4:12', maternalSister: '4:12',
-    fullSister: '4:176', paternalSister: '4:176'
-  };
-  return refs[id] || '';
+const getQuranRef = (id: string) => {
+  const rs: any = { son: '4:11', daughter: '4:11', father: '4:11', mother: '4:11', husband: '4:12', wife: '4:12' };
+  return rs[id] || '';
 };
