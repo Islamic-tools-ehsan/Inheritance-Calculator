@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { HeirKey, CalculationResult, DeceasedGender } from './types';
 import { i18nStrings } from './constants';
@@ -166,8 +165,8 @@ export const FamilyTree: React.FC<FamilyTreeProps> = ({ results, deceasedGender,
   const deceasedStatusLabel = `${t.deceasedLabel} (${deceasedGender === DeceasedGender.Male ? t.male : t.female})`;
 
   return (
-    <div className="w-full overflow-x-auto bg-white rounded-[2.5rem] border border-slate-100 p-12 shadow-inner">
-      <svg viewBox="0 0 1050 950" className="min-w-[1000px] h-auto">
+    <div className="w-full overflow-x-auto bg-white rounded-[2.5rem] border border-slate-100 p-4 md:p-12 shadow-inner print:p-0">
+      <svg viewBox="0 0 1050 950" className="min-w-[1000px] h-auto print:w-full">
         {sortedHeirs.map(r => renderConnection('deceased', r.heirId))}
         {sortedHeirs.filter(r => r.isBlocked).map(r => renderNode(r))}
         {renderNode({ id: 'deceased', label: deceasedStatusLabel })}

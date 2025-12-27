@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { CalculationResult } from './types';
-import { CheckCircle2, AlertCircle, HelpCircle, BookOpen, Scale, List, Ban } from 'lucide-react';
+import { CheckCircle2, AlertCircle, HelpCircle, BookOpen, List, Ban } from 'lucide-react';
 
 interface ResultExplanationsProps {
   results: CalculationResult[];
@@ -14,7 +13,8 @@ export const ResultExplanations: React.FC<ResultExplanationsProps> = ({ results,
 
   return (
     <div className="space-y-10">
-      <div className="bg-white rounded-[3.5rem] shadow-2xl shadow-slate-200 border border-slate-100 overflow-hidden">
+      {/* SHARE TABLE PAGE */}
+      <div className="bg-white rounded-[3.5rem] shadow-2xl shadow-slate-200 border border-slate-100 overflow-hidden page-break-after">
         <div className="p-10 border-b border-slate-100 flex items-center gap-4">
           <List className="text-orange-500" size={28} />
           <h2 className="text-2xl font-black">{t.shareTable}</h2>
@@ -68,7 +68,8 @@ export const ResultExplanations: React.FC<ResultExplanationsProps> = ({ results,
         </div>
       </div>
 
-      <section>
+      {/* EXPLANATIONS PAGE */}
+      <section className="page-break-before">
         <div className="flex items-center gap-4 mb-8 px-6">
           <BookOpen className="text-orange-600" size={32} />
           <h2 className="text-3xl font-black tracking-tight">{t.explanation}</h2>
@@ -78,7 +79,7 @@ export const ResultExplanations: React.FC<ResultExplanationsProps> = ({ results,
           {sharers.map((r, i) => (
             <div 
               key={`sharer-${i}`} 
-              className="bg-white p-10 rounded-[3rem] shadow-2xl shadow-slate-200/40 border border-slate-100 transition-all hover:scale-[1.01] hover:border-orange-500/30"
+              className="bg-white p-10 rounded-[3rem] shadow-2xl shadow-slate-200/40 border border-slate-100 transition-all hover:scale-[1.01] hover:border-orange-500/30 page-break-inside-avoid"
             >
               <div className="flex justify-between items-start mb-8">
                 <div className="flex items-center gap-6">
@@ -113,8 +114,9 @@ export const ResultExplanations: React.FC<ResultExplanationsProps> = ({ results,
         </div>
       </section>
 
+      {/* BLOCKED HEIRS PAGE (IF ANY) */}
       {blockedHeirs.length > 0 && (
-        <section className="mt-16">
+        <section className="mt-16 page-break-before">
           <div className="flex items-center gap-4 mb-8 px-6">
             <Ban className="text-red-600" size={32} />
             <h2 className="text-3xl font-black tracking-tight text-red-600 uppercase">{t.excludedHeader}</h2>
@@ -124,7 +126,7 @@ export const ResultExplanations: React.FC<ResultExplanationsProps> = ({ results,
             {blockedHeirs.map((r, i) => (
               <div 
                 key={`blocked-${i}`} 
-                className="bg-red-50/50 p-10 rounded-[3rem] shadow-2xl shadow-red-100/40 border border-red-100 transition-all hover:border-red-500/30"
+                className="bg-red-50/50 p-10 rounded-[3rem] shadow-2xl shadow-red-100/40 border border-red-100 transition-all hover:border-red-500/30 page-break-inside-avoid"
               >
                 <div className="flex justify-between items-start mb-6">
                   <div className="flex items-center gap-6">
@@ -143,13 +145,6 @@ export const ResultExplanations: React.FC<ResultExplanationsProps> = ({ results,
                 <div className="bg-white p-6 rounded-[2rem] border-2 border-red-100 mb-6">
                   <p className="text-lg text-red-800 font-bold leading-relaxed">
                     <span className="text-red-600 underline">{t.reasonLabel}:</span> {r.explanation}
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-3 px-2">
-                  <div className="w-1.5 h-1.5 bg-red-400 rounded-full"></div>
-                  <p className="text-xs font-black text-red-400 uppercase tracking-widest">
-                    {t.principleLabel}
                   </p>
                 </div>
               </div>

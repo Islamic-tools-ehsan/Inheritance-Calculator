@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { 
   InheritanceState, 
@@ -18,7 +17,7 @@ import { FamilyTree } from './FamilyTree';
 import { ResultExplanations } from './ResultExplanations';
 import { 
   Calculator, Users, Globe, Landmark, 
-  ArrowRight, RotateCcw, Printer, 
+  ArrowRight, RotateCcw, 
   Info, Network, Coins, MinusCircle, AlertTriangle, X, FileText, Download, ShieldCheck
 } from 'lucide-react';
 
@@ -31,6 +30,8 @@ const HEIR_LIMITS: Record<string, number> = {
   paternalGrandmother: 1,
   maternalGrandmother: 1
 };
+
+const DEFAULT_MAX_LIMIT = 100;
 
 const App: React.FC = () => {
   const [state, setState] = useState<InheritanceState>({
@@ -80,10 +81,6 @@ const App: React.FC = () => {
     return new Set(results.filter(r => r.isBlocked).map(r => r.heirId));
   }, [results]);
 
-  const hasSelectedHeirs = useMemo(() => {
-    return (Object.values(state.heirs) as number[]).some(count => count > 0);
-  }, [state.heirs]);
-
   const triggerError = (msg: string) => {
     setErrorMessage(msg);
     setTimeout(() => setErrorMessage(null), 5000);
@@ -106,7 +103,7 @@ const App: React.FC = () => {
   };
 
   const handleHeirChange = (key: HeirKey, value: number) => {
-    const max = HEIR_LIMITS[key] || 10;
+    const max = HEIR_LIMITS[key] || DEFAULT_MAX_LIMIT;
     if (value > max) {
       triggerError(`Maximum limit for ${t.heirs?.[key] || key} is ${max}.`);
       return;
@@ -162,12 +159,12 @@ const App: React.FC = () => {
     }
 
     const translatedName = t.heirs?.[h.id] || h.nameEn;
-    const limit = HEIR_LIMITS[h.id] ? `(0-${HEIR_LIMITS[h.id]})` : '';
+    const limitDisplay = HEIR_LIMITS[h.id] ? `(0-${HEIR_LIMITS[h.id]})` : '';
 
     return (
       <div key={h.id} className={containerClass}>
         <label className={labelClass}>
-          {translatedName} {limit}
+          {translatedName} {limitDisplay}
           {isBlocked && blocker && <span className="block text-[8px] mt-1 font-black">({t.blockedBy} {blocker})</span>}
         </label>
         <input 
@@ -222,7 +219,7 @@ const App: React.FC = () => {
         </div>
       )}
 
-      <header className="max-w-7xl mx-auto py-8 flex flex-col md:flex-row justify-between items-center gap-6">
+      <header className="max-w-7xl mx-auto py-8 flex flex-col md:flex-row justify-between items-center gap-6 no-print">
         <div className="flex items-center gap-4">
           <div className="bg-orange-600 p-4 rounded-3xl shadow-xl transition-transform hover:scale-105 active:scale-95 cursor-pointer">
             <Landmark className="text-white w-9 h-9" />
@@ -233,7 +230,7 @@ const App: React.FC = () => {
           </div>
         </div>
         
-        <div className="grid grid-cols-2 md:flex items-center gap-3 no-print w-full md:w-auto">
+        <div className="grid grid-cols-2 md:flex items-center gap-3 w-full md:w-auto">
           <div className="flex items-center gap-2 bg-white p-3 rounded-2xl shadow-sm border border-slate-200">
             <Coins size={18} className="text-emerald-600 shrink-0" />
             <select 
@@ -346,8 +343,10 @@ const App: React.FC = () => {
               {t.heirsSelection}
             </h2>
             <div className="grid grid-cols-2 gap-4 md:gap-6">
-              {MALE_HEIRS.filter(h => h.id === 'husband').map(renderHeirInput)}
-              {FEMALE_HEIRS.filter(h => h.id === 'wife').map(renderHeirInput)}
+              {/* Force Spouse Filtering */}
+              {state.deceasedGender === DeceasedGender.Female && MALE_HEIRS.filter(h => h.id === 'husband').map(renderHeirInput)}
+              {state.deceasedGender === DeceasedGender.Male && FEMALE_HEIRS.filter(h => h.id === 'wife').map(renderHeirInput)}
+              
               {[...MALE_HEIRS, ...FEMALE_HEIRS]
                 .filter(h => h.id !== 'husband' && h.id !== 'wife' && h.id !== 'freedSlaveMale' && h.id !== 'freedSlaveFemale')
                 .map(renderHeirInput)}
@@ -374,7 +373,7 @@ const App: React.FC = () => {
 
         <div className="lg:col-span-7 space-y-10">
           {!isCalculated ? (
-            <div className="bg-white border-8 border-dashed border-slate-200 rounded-[4rem] p-10 md:p-24 flex flex-col items-center text-center">
+            <div className="bg-white border-8 border-dashed border-slate-200 rounded-[4rem] p-10 md:p-24 flex flex-col items-center text-center no-print">
               <div className="bg-orange-50 p-10 rounded-full mb-10 shadow-inner">
                 <Info size={80} className="text-orange-200" />
               </div>
@@ -383,18 +382,18 @@ const App: React.FC = () => {
             </div>
           ) : (
             <div className="space-y-10 animate-in fade-in slide-in-from-bottom-10 duration-500 print-container">
-              <div className="bg-white p-6 md:p-10 rounded-[3.5rem] shadow-2xl border border-slate-100 overflow-hidden">
+              {/* PAGE 1: HEADER & SUMMARY */}
+              <div className="bg-white p-6 md:p-10 rounded-[3.5rem] shadow-2xl border border-slate-100 overflow-hidden page-break-after">
+                <div className="print-only mb-10 text-center border-b-4 border-orange-600 pb-8">
+                  <h1 className="text-4xl font-black font-arabic">{t.title}</h1>
+                  <p className="text-orange-600 text-xs font-black uppercase tracking-[0.4em] mt-2">{t.subtitle}</p>
+                </div>
+                
                 <div className="flex justify-between items-center mb-10">
                   <h2 className="text-3xl font-black flex items-center gap-3">
                     <span className="w-2 h-8 bg-orange-600 rounded-full block"></span>
                     {t.results}
                   </h2>
-                  <div className="flex gap-2 no-print">
-                    <button onClick={handleExportPDF} className="p-4 bg-orange-600 text-white hover:bg-orange-700 rounded-2xl transition-all shadow-lg flex items-center gap-2 px-6">
-                      <Download size={20} />
-                      <span className="text-xs uppercase font-black">PDF</span>
-                    </button>
-                  </div>
                 </div>
 
                 <div className="space-y-8">
@@ -426,7 +425,8 @@ const App: React.FC = () => {
                 </div>
               </div>
 
-              <div className="bg-white p-6 md:p-10 rounded-[3.5rem] shadow-2xl border border-slate-100">
+              {/* PAGE 2: FAMILY TREE */}
+              <div className="bg-white p-6 md:p-10 rounded-[3.5rem] shadow-2xl border border-slate-100 page-break-after">
                 <h2 className="text-2xl font-black mb-10 flex items-center gap-4">
                   <Network className="text-blue-500" size={28} />
                   {t.familyTree}
@@ -434,9 +434,10 @@ const App: React.FC = () => {
                 <FamilyTree results={results} deceasedGender={state.deceasedGender} currency={state.currency} language={state.language} />
               </div>
 
+              {/* PAGE 3: SHARE TABLE & EXPLANATIONS */}
               <ResultExplanations results={results} t={t} />
 
-              {/* PDF EXPORT & VALIDATION SECTION */}
+              {/* CTA & PDF EXPORT SECTION (VISIBLE ONLY ON SCREEN) */}
               <div className="mt-12 space-y-8 no-print">
                 <div className="bg-gradient-to-r from-emerald-600 to-teal-700 p-10 md:p-14 rounded-[4rem] text-white shadow-3xl flex flex-col items-center text-center group">
                   <div className="bg-white/20 p-6 rounded-full mb-8 backdrop-blur-md group-hover:scale-110 transition-transform">
@@ -468,8 +469,8 @@ const App: React.FC = () => {
                 </div>
               </div>
 
-              {/* PRINT ONLY: CERTIFICATION BLOCK */}
-              <div className="print-only mt-20 pt-20 border-t-2 border-slate-200">
+              {/* PRINT ONLY: CERTIFICATION BLOCK (LAST PAGE) */}
+              <div className="print-only mt-20 pt-20 border-t-2 border-slate-200 page-break-before">
                 <div className="flex justify-between gap-20">
                   <div className="flex-1 text-center">
                     <div className="h-32 border-b-2 border-slate-200 mb-4"></div>
