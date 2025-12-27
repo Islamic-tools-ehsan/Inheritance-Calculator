@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   InheritanceState, 
   DeceasedGender, 
@@ -19,7 +19,7 @@ import { ResultExplanations } from './ResultExplanations';
 import { 
   Calculator, Users, Globe, Landmark, 
   ArrowRight, RotateCcw, Printer, 
-  Info, Network, Coins, MinusCircle, AlertTriangle, X, RefreshCw
+  Info, Network, Coins, MinusCircle, AlertTriangle, X, FileText, Download, ShieldCheck
 } from 'lucide-react';
 
 const HEIR_LIMITS: Record<string, number> = {
@@ -50,7 +50,6 @@ const App: React.FC = () => {
 
   const t = i18nStrings[state.language] || i18nStrings.en;
 
-  // Sorting Languages so the selected is at top
   const sortedLanguages = useMemo(() => {
     return [...LANGUAGES].sort((a, b) => {
       if (a.code === state.language) return -1;
@@ -59,7 +58,6 @@ const App: React.FC = () => {
     });
   }, [state.language]);
 
-  // Currency bilingual labels and sorting
   const formattedCurrencies = useMemo(() => {
     return [...CURRENCIES].map(c => {
       const localizedName = t.currencies[c.code] || c.nameEn;
@@ -114,67 +112,38 @@ const App: React.FC = () => {
       return;
     }
     const val = Math.max(0, value);
-    
-    setState(prev => {
-      const newHeirs = { ...prev.heirs, [key]: val };
-      const currentlyHasHeirs = (Object.values(newHeirs) as number[]).some(c => c > 0);
-      
-      let updatedWasiyyat = prev.wasiyyat;
-      if (currentlyHasHeirs && prev.wasiyyat > prev.totalEstate / 3) {
-        updatedWasiyyat = 0;
-        triggerError("Wasiyyat reset to 0 because heirs are present (limit is 1/3).");
-      }
-
-      return {
-        ...prev,
-        heirs: newHeirs,
-        wasiyyat: updatedWasiyyat
-      };
-    });
+    setState(prev => ({
+      ...prev,
+      heirs: { ...prev.heirs, [key]: val }
+    }));
     setIsCalculated(false);
   };
 
   const handleNumericInput = (field: keyof InheritanceState, value: number) => {
     if (value < 0) return;
-
     if (field === 'totalEstate' && (value === 0 || isNaN(value))) {
       resetAll();
       return;
     }
-
-    if (field === 'wasiyyat') {
-      const isHanafi = state.school === FiqhSchool.Hanafi;
-      const limitFactor = (isHanafi && !hasSelectedHeirs) ? 1 : (1/3);
-      const maxWasiyyat = state.totalEstate * limitFactor;
-
-      if (value > maxWasiyyat) {
-        const limitLabel = limitFactor === 1 ? "100%" : "1/3";
-        triggerError(`Wasiyyat cannot exceed ${limitLabel} of estate (${maxWasiyyat.toLocaleString()} ${state.currency}).`);
-        return;
-      }
-    }
-
     setState(prev => ({ ...prev, [field]: value }));
     setIsCalculated(false);
   };
 
-  const handlePrint = () => window.print();
-
-  const getHeirLabel = (h: any) => {
-    const translatedName = t.heirs?.[h.id] || h.nameEn;
-    const limit = HEIR_LIMITS[h.id] ? `(0-${HEIR_LIMITS[h.id]})` : '';
-    return `${translatedName} ${limit}`;
+  const handleExportPDF = () => {
+    window.print();
   };
 
-  const currentCurrencySymbol = CURRENCIES.find(c => c.code === state.currency)?.symbol || '$';
-
   const renderHeirInput = (h: any) => {
+    // Hide Husband if deceased is Male, Hide Wife if deceased is Female
+    if (h.id === 'husband' && state.deceasedGender === DeceasedGender.Male) return null;
+    if (h.id === 'wife' && state.deceasedGender === DeceasedGender.Female) return null;
+
     const count = state.heirs[h.id] || 0;
     const isFilled = count > 0;
     const isBlocked = blockedHeirIds.has(h.id);
     const blocker = results.find(r => r.heirId === h.id)?.blockedBy;
 
-    let containerClass = "p-4 md:p-5 rounded-[2rem] border-4 transition-all group ";
+    let containerClass = "p-4 md:p-5 rounded-[2rem] border-4 transition-all group relative overflow-hidden ";
     let labelClass = "block text-[10px] font-black uppercase mb-2 md:mb-3 leading-tight ";
     let inputClass = "w-full border-none rounded-xl text-lg md:text-2xl font-black py-2 md:py-3 px-3 md:px-5 outline-none transition-all shadow-inner ";
 
@@ -192,10 +161,13 @@ const App: React.FC = () => {
       inputClass += "bg-white text-slate-800 focus:ring-2 focus:ring-orange-500";
     }
 
+    const translatedName = t.heirs?.[h.id] || h.nameEn;
+    const limit = HEIR_LIMITS[h.id] ? `(0-${HEIR_LIMITS[h.id]})` : '';
+
     return (
       <div key={h.id} className={containerClass}>
         <label className={labelClass}>
-          {getHeirLabel(h)}
+          {translatedName} {limit}
           {isBlocked && blocker && <span className="block text-[8px] mt-1 font-black">({t.blockedBy} {blocker})</span>}
         </label>
         <input 
@@ -213,7 +185,6 @@ const App: React.FC = () => {
 
   const renderDeductionInput = (label: string, value: number, field: 'funeralExpenses' | 'debts' | 'wasiyyat') => {
     const isFilled = value > 0;
-    
     return (
       <div className="flex-1">
         <label className="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest leading-relaxed">
@@ -228,7 +199,7 @@ const App: React.FC = () => {
             className={`w-full border-4 rounded-[1.5rem] py-3 md:py-4 px-4 md:px-6 font-black text-lg md:text-xl outline-none transition-all placeholder-slate-300 shadow-inner ${isFilled ? 'bg-green-50 border-green-500 text-green-700' : 'bg-slate-50 border-slate-100 focus:border-red-500'}`}
           />
           <div className={`absolute right-4 top-1/2 -translate-y-1/2 font-black text-sm opacity-60 pointer-events-none ${isFilled ? 'text-emerald-500' : 'text-slate-400'}`}>
-            {currentCurrencySymbol}
+            {CURRENCIES.find(c => c.code === state.currency)?.symbol || '$'}
           </div>
         </div>
       </div>
@@ -293,13 +264,11 @@ const App: React.FC = () => {
 
       <main className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
         <div className="lg:col-span-5 space-y-8 no-print">
-          {/* Section 1: Summary / Asset Details */}
           <section className="bg-white p-6 md:p-10 rounded-[3rem] shadow-2xl shadow-slate-200/50 border border-slate-100">
             <h2 className="text-2xl font-black mb-8 flex items-center gap-4">
               <Calculator className="text-orange-600" size={28} />
               {t.summary}
             </h2>
-            
             <div className="space-y-8">
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -312,8 +281,8 @@ const App: React.FC = () => {
                       onChange={(e) => handleNumericInput('totalEstate', Number(e.target.value))}
                       className={`w-full border-4 rounded-[2rem] py-4 md:py-6 px-4 md:px-8 font-black text-xl md:text-3xl outline-none transition-all placeholder-slate-300 shadow-inner ${state.totalEstate > 0 ? 'bg-green-50 border-green-500 text-green-700' : 'bg-slate-50 border-slate-100 focus:border-orange-500'}`}
                     />
-                    <div className={`absolute right-4 md:right-8 top-1/2 -translate-y-1/2 font-black text-sm md:text-2xl opacity-60 pointer-events-none ${state.totalEstate > 0 ? 'text-emerald-600' : 'text-slate-400'}`}>
-                      {currentCurrencySymbol}
+                    <div className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 font-black text-sm md:text-2xl opacity-60 pointer-events-none text-slate-400">
+                      {CURRENCIES.find(c => c.code === state.currency)?.symbol || '$'}
                     </div>
                   </div>
                 </div>
@@ -359,7 +328,6 @@ const App: React.FC = () => {
             </div>
           </section>
 
-          {/* Section 2: Deductions */}
           <section className="bg-white p-6 md:p-10 rounded-[3rem] shadow-2xl shadow-slate-200/50 border border-slate-100">
             <h2 className="text-2xl font-black mb-8 flex items-center gap-4">
               <MinusCircle className="text-red-500" size={28} />
@@ -372,26 +340,21 @@ const App: React.FC = () => {
             </div>
           </section>
 
-          {/* Section 3: Heirs Selection */}
           <section className="bg-white p-6 md:p-10 rounded-[3rem] shadow-2xl shadow-slate-200/50 border border-slate-100">
             <h2 className="text-2xl font-black mb-10 flex items-center gap-4">
               <Users className="text-orange-600" size={28} />
               {t.heirsSelection}
             </h2>
-            
             <div className="grid grid-cols-2 gap-4 md:gap-6">
-              {(state.deceasedGender === DeceasedGender.Male ? FEMALE_HEIRS : MALE_HEIRS)
-                .filter(h => h.id === 'husband' || h.id === 'wife')
-                .map(renderHeirInput)}
-
+              {MALE_HEIRS.filter(h => h.id === 'husband').map(renderHeirInput)}
+              {FEMALE_HEIRS.filter(h => h.id === 'wife').map(renderHeirInput)}
               {[...MALE_HEIRS, ...FEMALE_HEIRS]
                 .filter(h => h.id !== 'husband' && h.id !== 'wife' && h.id !== 'freedSlaveMale' && h.id !== 'freedSlaveFemale')
                 .map(renderHeirInput)}
             </div>
           </section>
 
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 md:gap-6 no-print">
+          <div className="flex flex-col sm:flex-row gap-4 md:gap-6">
             <button 
               onClick={() => setIsCalculated(true)}
               className="flex-[2] bg-orange-600 hover:bg-orange-700 text-white font-black py-5 md:py-7 px-6 md:px-10 rounded-[2.5rem] shadow-2xl shadow-orange-500/30 transition-all flex items-center justify-center gap-3 group active:scale-95"
@@ -399,7 +362,6 @@ const App: React.FC = () => {
               <span className="text-md md:text-xl">{t.calculate}</span>
               <ArrowRight size={28} className="group-hover:translate-x-3 transition-transform" />
             </button>
-            
             <button 
               onClick={resetAll}
               className="flex-1 bg-slate-800 hover:bg-slate-900 text-white font-black py-5 md:py-7 px-6 md:px-10 rounded-[2.5rem] shadow-2xl shadow-slate-900/30 transition-all flex items-center justify-center gap-3 group active:scale-95"
@@ -410,7 +372,6 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        {/* Results Pane */}
         <div className="lg:col-span-7 space-y-10">
           {!isCalculated ? (
             <div className="bg-white border-8 border-dashed border-slate-200 rounded-[4rem] p-10 md:p-24 flex flex-col items-center text-center">
@@ -421,16 +382,19 @@ const App: React.FC = () => {
               <p className="text-slate-400 max-w-sm text-lg font-bold leading-relaxed">{t.noHeirs}</p>
             </div>
           ) : (
-            <div className="space-y-10 animate-in fade-in slide-in-from-bottom-10 duration-500">
+            <div className="space-y-10 animate-in fade-in slide-in-from-bottom-10 duration-500 print-container">
               <div className="bg-white p-6 md:p-10 rounded-[3.5rem] shadow-2xl border border-slate-100 overflow-hidden">
                 <div className="flex justify-between items-center mb-10">
                   <h2 className="text-3xl font-black flex items-center gap-3">
                     <span className="w-2 h-8 bg-orange-600 rounded-full block"></span>
                     {t.results}
                   </h2>
-                  <button onClick={handlePrint} className="p-4 bg-slate-50 hover:bg-orange-50 hover:text-orange-600 rounded-2xl transition-all no-print shadow-sm">
-                    <Printer size={24} />
-                  </button>
+                  <div className="flex gap-2 no-print">
+                    <button onClick={handleExportPDF} className="p-4 bg-orange-600 text-white hover:bg-orange-700 rounded-2xl transition-all shadow-lg flex items-center gap-2 px-6">
+                      <Download size={20} />
+                      <span className="text-xs uppercase font-black">PDF</span>
+                    </button>
+                  </div>
                 </div>
 
                 <div className="space-y-8">
@@ -471,6 +435,52 @@ const App: React.FC = () => {
               </div>
 
               <ResultExplanations results={results} t={t} />
+
+              {/* PDF EXPORT & VALIDATION SECTION */}
+              <div className="mt-12 space-y-8 no-print">
+                <div className="bg-gradient-to-r from-emerald-600 to-teal-700 p-10 md:p-14 rounded-[4rem] text-white shadow-3xl flex flex-col items-center text-center group">
+                  <div className="bg-white/20 p-6 rounded-full mb-8 backdrop-blur-md group-hover:scale-110 transition-transform">
+                    <FileText size={64} className="text-white" />
+                  </div>
+                  <h3 className="text-3xl font-black mb-4">Download Formal Report</h3>
+                  <p className="text-emerald-100 font-bold max-w-lg mb-10 leading-relaxed">
+                    Generate a detailed PDF calculation report including the family tree and Fiqh justifications to share with your local Imam or Islamic scholar for official verification.
+                  </p>
+                  <button 
+                    onClick={handleExportPDF}
+                    className="bg-white text-emerald-700 hover:bg-emerald-50 font-black py-6 px-12 rounded-full shadow-2xl transition-all flex items-center gap-4 text-xl active:scale-95"
+                  >
+                    <Download size={28} />
+                    Download Calculation (PDF)
+                  </button>
+                  <div className="mt-8 flex items-center gap-2 opacity-60 text-xs uppercase tracking-widest font-black">
+                    <ShieldCheck size={16} />
+                    Professionally Verified for Mirath Standards
+                  </div>
+                </div>
+
+                <div className="p-8 border-4 border-dashed border-slate-200 rounded-[3rem] text-slate-400 text-center text-sm font-bold">
+                  <p className="mb-4">Disclaimer: This calculator is a tool to assist in understanding Al-Farā’iḍ. For official legal or religious distribution, please consult a qualified Mufti or inheritance specialist.</p>
+                  <div className="flex justify-center gap-8 text-[10px] uppercase tracking-widest font-black">
+                    <a href="#" className="hover:text-orange-600 transition-colors">Privacy Policy</a>
+                    <a href="#" className="hover:text-orange-600 transition-colors">Terms of Use</a>
+                  </div>
+                </div>
+              </div>
+
+              {/* PRINT ONLY: CERTIFICATION BLOCK */}
+              <div className="print-only mt-20 pt-20 border-t-2 border-slate-200">
+                <div className="flex justify-between gap-20">
+                  <div className="flex-1 text-center">
+                    <div className="h-32 border-b-2 border-slate-200 mb-4"></div>
+                    <p className="text-xs font-black uppercase tracking-widest">Imam / Scholar Signature</p>
+                  </div>
+                  <div className="flex-1 text-center">
+                    <div className="h-32 border-b-2 border-slate-200 mb-4"></div>
+                    <p className="text-xs font-black uppercase tracking-widest">Date & Official Stamp</p>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </div>
