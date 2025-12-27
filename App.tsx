@@ -95,6 +95,7 @@ const App: React.FC = () => {
       const newHeirs = { ...prev.heirs, [key]: val };
       const currentlyHasHeirs = (Object.values(newHeirs) as number[]).some(c => c > 0);
       
+      // Fiqh Rule: If an heir is added, check if Wasiyyat exceeds 1/3 (unless Hanafi with no heirs)
       let updatedWasiyyat = prev.wasiyyat;
       if (currentlyHasHeirs && prev.wasiyyat > prev.totalEstate / 3) {
         updatedWasiyyat = 0;
@@ -113,6 +114,7 @@ const App: React.FC = () => {
   const handleNumericInput = (field: keyof InheritanceState, value: number) => {
     if (value < 0) return;
 
+    // Requirement: If principal amount is cleared or zero, reset all fields
     if (field === 'totalEstate' && (value === 0 || isNaN(value))) {
       resetAll();
       return;
@@ -120,6 +122,7 @@ const App: React.FC = () => {
 
     if (field === 'wasiyyat') {
       const isHanafi = state.school === FiqhSchool.Hanafi;
+      // Special Fiqh Case: Hanafi allows up to 100% if NO heirs are selected.
       const limitFactor = (isHanafi && !hasSelectedHeirs) ? 1 : (1/3);
       const maxWasiyyat = state.totalEstate * limitFactor;
 
@@ -195,10 +198,8 @@ const App: React.FC = () => {
     return (
       <div className="flex-1">
         <label className="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest leading-relaxed">
-          {label} {subLabel && (
-            <span className={isHanafiNoHeirs ? "text-emerald-500 ml-1" : "text-red-500 ml-1"}>
-              ({isHanafiNoHeirs ? "Up to 100%" : subLabel})
-            </span>
+          {label} {isWasiyyat && isHanafiNoHeirs && (
+            <span className="text-emerald-500 ml-1">(Up to 100%)</span>
           )}
         </label>
         <div className="relative">
@@ -275,7 +276,7 @@ const App: React.FC = () => {
 
       <main className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
         <div className="lg:col-span-5 space-y-8 no-print">
-          {/* Section 1: Summary */}
+          {/* Section 1: Summary / Asset Details */}
           <section className="bg-white p-6 md:p-10 rounded-[3rem] shadow-2xl shadow-slate-200/50 border border-slate-100">
             <h2 className="text-2xl font-black mb-8 flex items-center gap-4">
               <Calculator className="text-orange-600" size={28} />
@@ -341,7 +342,7 @@ const App: React.FC = () => {
             </div>
           </section>
 
-          {/* Section 2: Heirs Selection (Now above Deductions) */}
+          {/* Section 2: Heirs Selection */}
           <section className="bg-white p-6 md:p-10 rounded-[3rem] shadow-2xl shadow-slate-200/50 border border-slate-100">
             <h2 className="text-2xl font-black mb-10 flex items-center gap-4">
               <Users className="text-orange-600" size={28} />
@@ -359,7 +360,7 @@ const App: React.FC = () => {
             </div>
           </section>
 
-          {/* Section 3: Deductions (3 Fields) */}
+          {/* Section 3: Deductions (Placed below heirs) */}
           <section className="bg-white p-6 md:p-10 rounded-[3rem] shadow-2xl shadow-slate-200/50 border border-slate-100">
             <h2 className="text-2xl font-black mb-8 flex items-center gap-4">
               <MinusCircle className="text-red-500" size={28} />
@@ -368,11 +369,11 @@ const App: React.FC = () => {
             <div className="space-y-6">
               {renderDeductionInput(t.funeralExpenses, state.funeralExpenses, 'funeralExpenses')}
               {renderDeductionInput(t.debts, state.debts, 'debts')}
-              {renderDeductionInput(t.wasiyyat, state.wasiyyat, 'wasiyyat', t.wasiyyatLimit)}
+              {renderDeductionInput(t.wasiyyat, state.wasiyyat, 'wasiyyat')}
             </div>
           </section>
 
-          {/* Action Buttons at the very bottom */}
+          {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 md:gap-6 no-print">
             <button 
               onClick={() => setIsCalculated(true)}
@@ -392,6 +393,7 @@ const App: React.FC = () => {
           </div>
         </div>
 
+        {/* Results Pane */}
         <div className="lg:col-span-7 space-y-10">
           {!isCalculated ? (
             <div className="bg-white border-8 border-dashed border-slate-200 rounded-[4rem] p-10 md:p-24 flex flex-col items-center text-center">
