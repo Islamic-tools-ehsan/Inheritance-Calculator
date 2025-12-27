@@ -1,16 +1,19 @@
 
 import React from 'react';
 import { HeirKey, CalculationResult, DeceasedGender } from './types';
+import { i18nStrings } from './constants';
 
 interface FamilyTreeProps {
   results: CalculationResult[];
   deceasedGender: DeceasedGender;
   currency: string;
+  language: string;
 }
 
-export const FamilyTree: React.FC<FamilyTreeProps> = ({ results, deceasedGender }) => {
+export const FamilyTree: React.FC<FamilyTreeProps> = ({ results, deceasedGender, language }) => {
   const nodeWidth = 175;
   const nodeHeight = 105;
+  const t = i18nStrings[language] || i18nStrings.en;
 
   const positions: Record<string, { x: number; y: number }> = {
     grandfather: { x: 150, y: 80 },
@@ -68,7 +71,6 @@ export const FamilyTree: React.FC<FamilyTreeProps> = ({ results, deceasedGender 
     const count = !isDeceased ? (heir as CalculationResult).count : 1;
     const label = isDeceased ? (heir as any).label : (heir as CalculationResult).heirName;
     const totalShare = !isDeceased && !isBlocked ? `${(heir as CalculationResult).sharePercentage.toFixed(1)}%` : null;
-    const perShare = !isDeceased && !isBlocked && count > 1 ? `${(heir as CalculationResult).sharePercentagePerHeir.toFixed(1)}% each` : null;
 
     let bgColor = isDeceased ? '#1e293b' : isBlocked ? '#fef2f2' : '#f0fdf4';
     let borderColor = isDeceased ? '#0f172a' : isBlocked ? '#ef4444' : '#22c55e';
@@ -99,19 +101,9 @@ export const FamilyTree: React.FC<FamilyTreeProps> = ({ results, deceasedGender 
           textAnchor="middle"
           dominantBaseline="middle"
           fill={textColor}
-          className="text-[10px] font-black uppercase tracking-wider"
+          className="text-[10px] font-black uppercase tracking-wider font-arabic"
         >
-          {label.split('(')[0].trim()}
-        </text>
-        <text
-          x={pos.x}
-          y={pos.y - (totalShare ? 5 : -14)}
-          textAnchor="middle"
-          dominantBaseline="middle"
-          fill={textColor}
-          className="text-[12px] font-arabic font-bold opacity-70"
-        >
-          {label.includes('(') ? label.substring(label.indexOf('(')) : ''}
+          {label}
         </text>
         {!isDeceased && count > 1 && (
            <text
@@ -122,7 +114,7 @@ export const FamilyTree: React.FC<FamilyTreeProps> = ({ results, deceasedGender 
             fill={textColor}
             className="text-[9px] font-black uppercase opacity-60 tracking-widest"
           >
-            Count: {count}
+            {t.table.count}: {count}
           </text>
         )}
         {totalShare && (
@@ -137,18 +129,6 @@ export const FamilyTree: React.FC<FamilyTreeProps> = ({ results, deceasedGender 
             {totalShare}
           </text>
         )}
-        {perShare && (
-           <text
-            x={pos.x}
-            y={pos.y + 40}
-            textAnchor="middle"
-            dominantBaseline="middle"
-            fill="#059669"
-            className="text-[9px] font-black uppercase tracking-tight"
-          >
-            ({perShare})
-          </text>
-        )}
         {isBlocked && (
           <text
             x={pos.x}
@@ -158,7 +138,7 @@ export const FamilyTree: React.FC<FamilyTreeProps> = ({ results, deceasedGender 
             fill="#ef4444"
             className="text-[10px] font-black uppercase tracking-widest"
           >
-            Blocked
+            {t.heirTypes.Blocked}
           </text>
         )}
       </g>
@@ -183,15 +163,14 @@ export const FamilyTree: React.FC<FamilyTreeProps> = ({ results, deceasedGender 
     );
   };
 
+  const deceasedStatusLabel = `${t.deceasedLabel} (${deceasedGender === DeceasedGender.Male ? t.male : t.female})`;
+
   return (
     <div className="w-full overflow-x-auto bg-white rounded-[2.5rem] border border-slate-100 p-12 shadow-inner">
       <svg viewBox="0 0 1050 950" className="min-w-[1000px] h-auto">
         {sortedHeirs.map(r => renderConnection('deceased', r.heirId))}
-        
         {sortedHeirs.filter(r => r.isBlocked).map(r => renderNode(r))}
-
-        {renderNode({ id: 'deceased', label: `Deceased (${deceasedGender})` })}
-
+        {renderNode({ id: 'deceased', label: deceasedStatusLabel })}
         {sortedHeirs.filter(r => !r.isBlocked).map(r => renderNode(r))}
       </svg>
     </div>

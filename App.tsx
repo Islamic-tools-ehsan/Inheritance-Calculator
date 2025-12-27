@@ -50,6 +50,30 @@ const App: React.FC = () => {
 
   const t = i18nStrings[state.language] || i18nStrings.en;
 
+  // Sorting Languages so the selected is at top
+  const sortedLanguages = useMemo(() => {
+    return [...LANGUAGES].sort((a, b) => {
+      if (a.code === state.language) return -1;
+      if (b.code === state.language) return 1;
+      return 0;
+    });
+  }, [state.language]);
+
+  // Currency bilingual labels and sorting
+  const formattedCurrencies = useMemo(() => {
+    return [...CURRENCIES].map(c => {
+      const localizedName = t.currencies[c.code] || c.nameEn;
+      const displayLabel = state.language === 'en' 
+        ? `${c.nameEn} (${c.symbol})`
+        : `${localizedName} / ${c.nameEn} (${c.symbol})`;
+      return { ...c, displayLabel };
+    }).sort((a, b) => {
+       if (a.code === state.currency) return -1;
+       if (b.code === state.currency) return 1;
+       return 0;
+    });
+  }, [state.currency, state.language, t.currencies]);
+
   const results = useMemo(() => {
     return calculateInheritance(state);
   }, [state]);
@@ -95,7 +119,6 @@ const App: React.FC = () => {
       const newHeirs = { ...prev.heirs, [key]: val };
       const currentlyHasHeirs = (Object.values(newHeirs) as number[]).some(c => c > 0);
       
-      // Fiqh Rule: If an heir is added, check if Wasiyyat exceeds 1/3 (unless Hanafi with no heirs)
       let updatedWasiyyat = prev.wasiyyat;
       if (currentlyHasHeirs && prev.wasiyyat > prev.totalEstate / 3) {
         updatedWasiyyat = 0;
@@ -114,7 +137,6 @@ const App: React.FC = () => {
   const handleNumericInput = (field: keyof InheritanceState, value: number) => {
     if (value < 0) return;
 
-    // Requirement: If principal amount is cleared or zero, reset all fields
     if (field === 'totalEstate' && (value === 0 || isNaN(value))) {
       resetAll();
       return;
@@ -122,7 +144,6 @@ const App: React.FC = () => {
 
     if (field === 'wasiyyat') {
       const isHanafi = state.school === FiqhSchool.Hanafi;
-      // Special Fiqh Case: Hanafi allows up to 100% if NO heirs are selected.
       const limitFactor = (isHanafi && !hasSelectedHeirs) ? 1 : (1/3);
       const maxWasiyyat = state.totalEstate * limitFactor;
 
@@ -190,17 +211,13 @@ const App: React.FC = () => {
     );
   };
 
-  const renderDeductionInput = (label: string, value: number, field: 'funeralExpenses' | 'debts' | 'wasiyyat', subLabel?: string) => {
+  const renderDeductionInput = (label: string, value: number, field: 'funeralExpenses' | 'debts' | 'wasiyyat') => {
     const isFilled = value > 0;
-    const isWasiyyat = field === 'wasiyyat';
-    const isHanafiNoHeirs = isWasiyyat && state.school === FiqhSchool.Hanafi && !hasSelectedHeirs;
     
     return (
       <div className="flex-1">
         <label className="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest leading-relaxed">
-          {label} {isWasiyyat && isHanafiNoHeirs && (
-            <span className="text-emerald-500 ml-1">(Up to 100%)</span>
-          )}
+          {label}
         </label>
         <div className="relative">
           <input 
@@ -210,7 +227,7 @@ const App: React.FC = () => {
             onChange={(e) => handleNumericInput(field, Number(e.target.value))}
             className={`w-full border-4 rounded-[1.5rem] py-3 md:py-4 px-4 md:px-6 font-black text-lg md:text-xl outline-none transition-all placeholder-slate-300 shadow-inner ${isFilled ? 'bg-green-50 border-green-500 text-green-700' : 'bg-slate-50 border-slate-100 focus:border-red-500'}`}
           />
-          <div className={`absolute right-4 top-1/2 -translate-y-1/2 font-black text-sm opacity-60 pointer-events-none ${isFilled ? 'text-green-500' : 'text-slate-400'}`}>
+          <div className={`absolute right-4 top-1/2 -translate-y-1/2 font-black text-sm opacity-60 pointer-events-none ${isFilled ? 'text-emerald-500' : 'text-slate-400'}`}>
             {currentCurrencySymbol}
           </div>
         </div>
@@ -247,15 +264,15 @@ const App: React.FC = () => {
         
         <div className="grid grid-cols-2 md:flex items-center gap-3 no-print w-full md:w-auto">
           <div className="flex items-center gap-2 bg-white p-3 rounded-2xl shadow-sm border border-slate-200">
-            <Coins size={18} className="text-orange-500 shrink-0" />
+            <Coins size={18} className="text-emerald-600 shrink-0" />
             <select 
               value={state.currency} 
               onChange={(e) => setState({...state, currency: e.target.value})}
               className="bg-transparent border-none text-[10px] md:text-sm font-black focus:ring-0 w-full cursor-pointer pr-4"
             >
-              {CURRENCIES.map(c => (
+              {formattedCurrencies.map(c => (
                 <option key={c.code} value={c.code} className="font-sans">
-                  {c.symbol} {c.nameEn}
+                  {c.displayLabel}
                 </option>
               ))}
             </select>
@@ -268,7 +285,7 @@ const App: React.FC = () => {
               onChange={(e) => setState({...state, language: e.target.value})}
               className="bg-transparent border-none text-[10px] md:text-sm font-black focus:ring-0 w-full cursor-pointer pr-4"
             >
-              {LANGUAGES.map(l => <option key={l.code} value={l.code} className="font-sans">{l.name}</option>)}
+              {sortedLanguages.map(l => <option key={l.code} value={l.code} className="font-sans">{l.name}</option>)}
             </select>
           </div>
         </div>
@@ -295,7 +312,7 @@ const App: React.FC = () => {
                       onChange={(e) => handleNumericInput('totalEstate', Number(e.target.value))}
                       className={`w-full border-4 rounded-[2rem] py-4 md:py-6 px-4 md:px-8 font-black text-xl md:text-3xl outline-none transition-all placeholder-slate-300 shadow-inner ${state.totalEstate > 0 ? 'bg-green-50 border-green-500 text-green-700' : 'bg-slate-50 border-slate-100 focus:border-orange-500'}`}
                     />
-                    <div className={`absolute right-4 md:right-8 top-1/2 -translate-y-1/2 font-black text-sm md:text-2xl opacity-60 pointer-events-none ${state.totalEstate > 0 ? 'text-green-500' : 'text-slate-400'}`}>
+                    <div className={`absolute right-4 md:right-8 top-1/2 -translate-y-1/2 font-black text-sm md:text-2xl opacity-60 pointer-events-none ${state.totalEstate > 0 ? 'text-emerald-600' : 'text-slate-400'}`}>
                       {currentCurrencySymbol}
                     </div>
                   </div>
@@ -311,7 +328,7 @@ const App: React.FC = () => {
                     }}
                     className="w-full h-[60px] md:h-[92px] bg-slate-50 border-none rounded-[2rem] px-4 md:px-8 font-black text-xs md:text-lg focus:ring-4 focus:ring-orange-500 transition-all cursor-pointer"
                   >
-                    {Object.values(FiqhSchool).map(s => <option key={s} value={s}>{s}</option>)}
+                    {Object.values(FiqhSchool).map(s => <option key={s} value={s}>{t.schools[s] || s}</option>)}
                   </select>
                 </div>
               </div>
@@ -342,7 +359,20 @@ const App: React.FC = () => {
             </div>
           </section>
 
-          {/* Section 2: Heirs Selection */}
+          {/* Section 2: Deductions */}
+          <section className="bg-white p-6 md:p-10 rounded-[3rem] shadow-2xl shadow-slate-200/50 border border-slate-100">
+            <h2 className="text-2xl font-black mb-8 flex items-center gap-4">
+              <MinusCircle className="text-red-500" size={28} />
+              {t.deductions}
+            </h2>
+            <div className="space-y-6">
+              {renderDeductionInput(t.funeralExpenses, state.funeralExpenses, 'funeralExpenses')}
+              {renderDeductionInput(t.debts, state.debts, 'debts')}
+              {renderDeductionInput(t.wasiyyat, state.wasiyyat, 'wasiyyat')}
+            </div>
+          </section>
+
+          {/* Section 3: Heirs Selection */}
           <section className="bg-white p-6 md:p-10 rounded-[3rem] shadow-2xl shadow-slate-200/50 border border-slate-100">
             <h2 className="text-2xl font-black mb-10 flex items-center gap-4">
               <Users className="text-orange-600" size={28} />
@@ -360,19 +390,6 @@ const App: React.FC = () => {
             </div>
           </section>
 
-          {/* Section 3: Deductions (Placed below heirs) */}
-          <section className="bg-white p-6 md:p-10 rounded-[3rem] shadow-2xl shadow-slate-200/50 border border-slate-100">
-            <h2 className="text-2xl font-black mb-8 flex items-center gap-4">
-              <MinusCircle className="text-red-500" size={28} />
-              {t.deductions}
-            </h2>
-            <div className="space-y-6">
-              {renderDeductionInput(t.funeralExpenses, state.funeralExpenses, 'funeralExpenses')}
-              {renderDeductionInput(t.debts, state.debts, 'debts')}
-              {renderDeductionInput(t.wasiyyat, state.wasiyyat, 'wasiyyat')}
-            </div>
-          </section>
-
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 md:gap-6 no-print">
             <button 
@@ -387,8 +404,8 @@ const App: React.FC = () => {
               onClick={resetAll}
               className="flex-1 bg-slate-800 hover:bg-slate-900 text-white font-black py-5 md:py-7 px-6 md:px-10 rounded-[2.5rem] shadow-2xl shadow-slate-900/30 transition-all flex items-center justify-center gap-3 group active:scale-95"
             >
-              <RefreshCw size={24} className="group-hover:rotate-180 transition-transform duration-500" />
-              <span className="text-md md:text-lg">{t.recalculate}</span>
+              <RotateCcw size={24} className="group-hover:rotate-180 transition-transform duration-500" />
+              <span className="text-md md:text-lg">{t.reset}</span>
             </button>
           </div>
         </div>
@@ -417,7 +434,7 @@ const App: React.FC = () => {
                 </div>
 
                 <div className="space-y-8">
-                  <div className="bg-gradient-to-br from-orange-600 to-orange-500 p-8 md:p-12 rounded-[3rem] shadow-2xl shadow-orange-500/20 text-white flex flex-col md:flex-row justify-between items-center gap-6">
+                  <div className="bg-gradient-to-br from-slate-900 to-slate-800 p-8 md:p-12 rounded-[3rem] shadow-2xl text-white flex flex-col md:flex-row justify-between items-center gap-6">
                     <div className="w-full md:w-auto">
                       <p className="text-[10px] font-black uppercase mb-2 tracking-widest opacity-80">{t.distributionAmount}</p>
                       <p className="text-5xl md:text-7xl font-black flex items-baseline gap-2">
@@ -426,19 +443,19 @@ const App: React.FC = () => {
                       </p>
                       {(state.funeralExpenses > 0 || state.debts > 0 || state.wasiyyat > 0) && (
                         <div className="mt-6 space-y-1 bg-white/10 p-4 rounded-2xl">
-                           <p className="text-xs font-bold opacity-80">Total Deductions: {(state.funeralExpenses + state.debts + state.wasiyyat).toLocaleString()} {state.currency}</p>
-                           <p className="text-sm font-black">Net Estate for Distribution: {(state.totalEstate - (state.funeralExpenses + state.debts + state.wasiyyat)).toLocaleString()} {state.currency}</p>
+                           <p className="text-xs font-bold opacity-80">{t.totalDeductionsLabel}: {(state.funeralExpenses + state.debts + state.wasiyyat).toLocaleString()} {state.currency}</p>
+                           <p className="text-sm font-black text-emerald-400">{t.netEstateLabel}: {(state.totalEstate - (state.funeralExpenses + state.debts + state.wasiyyat)).toLocaleString()} {state.currency}</p>
                         </div>
                       )}
                     </div>
                     <div className="flex gap-4">
-                      <div className="bg-white/20 p-6 rounded-3xl backdrop-blur-sm text-center min-w-[120px]">
-                        <p className="text-[10px] font-black uppercase opacity-70 mb-1">School</p>
-                        <p className="text-xl font-black">{state.school}</p>
+                      <div className="bg-white/10 p-6 rounded-3xl backdrop-blur-sm text-center min-w-[120px]">
+                        <p className="text-[10px] font-black uppercase opacity-70 mb-1">{t.fiqhSchool}</p>
+                        <p className="text-xl font-black">{t.schools[state.school] || state.school}</p>
                       </div>
-                      <div className="bg-white/20 p-6 rounded-3xl backdrop-blur-sm text-center min-w-[120px]">
-                        <p className="text-[10px] font-black uppercase opacity-70 mb-1">Gender</p>
-                        <p className="text-xl font-black">{state.deceasedGender}</p>
+                      <div className="bg-white/10 p-6 rounded-3xl backdrop-blur-sm text-center min-w-[120px]">
+                        <p className="text-[10px] font-black uppercase opacity-70 mb-1">{t.deceasedGender}</p>
+                        <p className="text-xl font-black">{state.deceasedGender === DeceasedGender.Male ? t.male : t.female}</p>
                       </div>
                     </div>
                   </div>
@@ -450,7 +467,7 @@ const App: React.FC = () => {
                   <Network className="text-blue-500" size={28} />
                   {t.familyTree}
                 </h2>
-                <FamilyTree results={results} deceasedGender={state.deceasedGender} currency={state.currency} />
+                <FamilyTree results={results} deceasedGender={state.deceasedGender} currency={state.currency} language={state.language} />
               </div>
 
               <ResultExplanations results={results} t={t} />

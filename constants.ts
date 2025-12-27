@@ -76,182 +76,54 @@ export const FEMALE_HEIRS: HeirDefinition[] = [
 export const ALL_HEIRS = [...MALE_HEIRS, ...FEMALE_HEIRS];
 
 const heirTranslations: Record<string, Record<HeirKey, string>> = {
-  en: {
-    son: 'Son', grandson: "Son's son", father: 'Father', grandfather: 'Paternal grandfather',
-    fullBrother: 'Full brother', paternalBrother: 'Paternal brother', maternalBrother: 'Maternal brother',
-    nephewFull: 'Son of full brother', nephewPaternal: 'Son of paternal brother',
-    uncleFull: 'Paternal uncle (full)', unclePaternal: 'Paternal uncle (paternal)',
-    cousinFull: 'Son of full paternal uncle', cousinPaternal: 'Son of paternal uncle (paternal)',
-    husband: 'Husband', freedSlaveMale: 'Freed male slave',
-    daughter: 'Daughter', granddaughter: "Son's daughter", mother: 'Mother',
-    paternalGrandmother: 'Paternal grandmother', maternalGrandmother: 'Maternal grandmother',
-    fullSister: 'Full sister', paternalSister: 'Paternal sister', maternalSister: 'Maternal sister',
-    wife: 'Wife', freedSlaveFemale: 'Freed female slave',
-    governmentTreasury: 'Government Treasury (Bait-ul-Maal)'
-  },
-  ur: {
-    son: 'بیٹا', grandson: 'پوتا', father: 'والد', grandfather: 'دادا',
-    fullBrother: 'سگا بھائی', paternalBrother: 'علاتی بھائی', maternalBrother: 'اخیافی بھائی',
-    nephewFull: 'بھتیجا (سگے بھائی کا بیٹا)', nephewPaternal: 'بھتیجا (علاتی بھائی کا بیٹا)',
-    uncleFull: 'سگا چچا', unclePaternal: 'علاتی چچا',
-    cousinFull: 'سگے چچا کا بیٹا', cousinPaternal: 'علاتی چچا کا بیٹا',
-    husband: 'شوہر', freedSlaveMale: 'آزاد کردہ غلام',
-    daughter: 'بیٹی', granddaughter: 'پوتی', mother: 'والدہ',
-    paternalGrandmother: 'دادی', maternalGrandmother: 'نانی',
-    fullSister: 'سگی بہن', paternalSister: 'علاتی بہن', maternalSister: 'اخیافی بہن',
-    wife: 'بیوی', freedSlaveFemale: 'آزاد کردہ لونڈی',
-    governmentTreasury: 'بیت المال'
-  },
-  ar: {
-    son: 'ابن', grandson: 'ابن ابن', father: 'أب', grandfather: 'جد لأب',
-    fullBrother: 'أخ شقيق', paternalBrother: 'أخ لأب', maternalBrother: 'أخ لأم',
-    nephewFull: 'ابن أخ شقيق', nephewPaternal: 'ابن أخ لأب',
-    uncleFull: 'عم شقيق', unclePaternal: 'عم لأب',
-    cousinFull: 'ابن عم شقيق', cousinPaternal: 'ابن عم لأب',
-    husband: 'زوج', freedSlaveMale: 'معتق',
-    daughter: 'بنت', granddaughter: 'بنت ابن', mother: 'أم',
-    paternalGrandmother: 'جدة لأب', maternalGrandmother: 'جدة لأم',
-    fullSister: 'أخت شقيقة', paternalSister: 'أخت لأب', maternalSister: 'أخت لأم',
-    wife: 'زوجة', freedSlaveFemale: 'معتقة',
-    governmentTreasury: 'بيت المال'
-  },
-  hi: {
-    son: 'बेटा', grandson: 'पोता', father: 'पिता', grandfather: 'दादा',
-    fullBrother: 'सगा भाई', paternalBrother: 'सौतेला भाई (पिता)', maternalBrother: 'सौतेला भाई (माता)',
-    nephewFull: 'भतीजा', nephewPaternal: 'भतीजा',
-    uncleFull: 'चाचा', unclePaternal: 'चाचा',
-    cousinFull: 'चचेरा भाई', cousinPaternal: 'चचेरा भाई',
-    husband: 'पति', freedSlaveMale: 'आज़ाद गुलाम',
-    daughter: 'बेटी', granddaughter: 'पोटी', mother: 'माँ',
-    paternalGrandmother: 'दादी', maternalGrandmother: 'नानी',
-    fullSister: 'सगी बहन', paternalSister: 'सौतेली बहन (पिता)', maternalSister: 'सौतेली बहन (माता)',
-    wife: 'पत्नी', freedSlaveFemale: 'आज़ाद दासी',
-    governmentTreasury: 'बैतुल माल (सरकारी खजाना)'
-  }
+  en: { son: 'Son', grandson: "Son's son", father: 'Father', grandfather: 'Grandfather', fullBrother: 'Full Brother', paternalBrother: 'Paternal Brother', maternalBrother: 'Maternal Brother', nephewFull: 'Nephew (Full)', nephewPaternal: 'Nephew (Paternal)', uncleFull: 'Uncle (Full)', unclePaternal: 'Uncle (Paternal)', cousinFull: 'Cousin (Full)', cousinPaternal: 'Cousin (Paternal)', husband: 'Husband', freedSlaveMale: 'Freed Slave (M)', daughter: 'Daughter', granddaughter: "Son's Daughter", mother: 'Mother', paternalGrandmother: 'Paternal Grandmother', maternalGrandmother: 'Maternal Grandmother', fullSister: 'Full Sister', paternalSister: 'Paternal Sister', maternalSister: 'Maternal Sister', wife: 'Wife', freedSlaveFemale: 'Freed Slave (F)', governmentTreasury: 'Bait-ul-Maal' },
+  ur: { son: 'بیٹا', grandson: 'پوتا', father: 'والد', grandfather: 'دادا', fullBrother: 'سگا بھائی', paternalBrother: 'علاتی بھائی', maternalBrother: 'اخیافی بھائی', nephewFull: 'بھتیجا (سگا)', nephewPaternal: 'بھتیجا (علاتی)', uncleFull: 'چچا (سگا)', unclePaternal: 'چچا (علاتی)', cousinFull: 'چچا زاد (سگا)', cousinPaternal: 'چچا زاد (علاتی)', husband: 'شوہر', freedSlaveMale: 'آزاد کردہ غلام', daughter: 'بیٹی', granddaughter: 'پوتی', mother: 'والدہ', paternalGrandmother: 'دادی', maternalGrandmother: 'نانی', fullSister: 'سگی بہن', paternalSister: 'علاتی بہن', maternalSister: 'اخیافی بہن', wife: 'بیوی', freedSlaveFemale: 'آزاد کردہ لونڈی', governmentTreasury: 'بیت المال' },
+  ar: { son: 'ابن', grandson: 'ابن ابن', father: 'أب', grandfather: 'جد', fullBrother: 'أخ شقيق', paternalBrother: 'أخ لأب', maternalBrother: 'أخ لأم', nephewFull: 'ابن أخ شقيق', nephewPaternal: 'ابن أخ لأب', uncleFull: 'عم شقيق', unclePaternal: 'عم لأب', cousinFull: 'ابن عم شقيق', cousinPaternal: 'ابن عم لأب', husband: 'زوج', freedSlaveMale: 'معتق', daughter: 'بنت', granddaughter: 'بنت ابن', mother: 'أم', paternalGrandmother: 'جدة لأب', maternalGrandmother: 'جدة لأم', fullSister: 'أخت شقيقة', paternalSister: 'أخت لأب', maternalSister: 'أخت لأم', wife: 'زوجة', freedSlaveFemale: 'معتقة', governmentTreasury: 'بيت المال' },
+  hi: { son: 'बेटा', grandson: 'पोता', father: 'पिता', grandfather: 'दादा', fullBrother: 'सगा भाई', paternalBrother: 'सौतेला भाई', maternalBrother: 'सौतेला भाई (माँ)', nephewFull: 'भतीजा', nephewPaternal: 'भतीजा (सौतेला)', uncleFull: 'सगा चाचा', unclePaternal: 'सौतेला चाचा', cousinFull: 'सगा चचेरा भाई', cousinPaternal: 'सौतेला चचेरा भाई', husband: 'पति', freedSlaveMale: 'आज़ाद गुलाम', daughter: 'बेटी', granddaughter: 'पोती', mother: 'माता', paternalGrandmother: 'दादी', maternalGrandmother: 'नानी', fullSister: 'सगी बहन', paternalSister: 'सौतेली बहन', maternalSister: 'सौतेली बहन (माँ)', wife: 'पत्नी', freedSlaveFemale: 'आज़ाद दासी', governmentTreasury: 'राजकोष' },
+  bn: { son: 'ছেলে', grandson: 'পৌত্র', father: 'পিতা', grandfather: 'দাদা', fullBrother: 'সহোদর ভাই', paternalBrother: 'বৈমাত্রেয় ভাই', maternalBrother: 'বৈপিত্রীয় ভাই', nephewFull: 'ভাইপো', nephewPaternal: 'ভাইপো (বৈমাত্রেয়)', uncleFull: 'চাচা', unclePaternal: 'চাচা (বৈমাত্রেয়)', cousinFull: 'চাচাতো ভাই', cousinPaternal: 'চাচাতো ভাই (বৈমাত্রেয়)', husband: 'স্বামী', freedSlaveMale: 'মুক্ত দাস', daughter: 'মেয়ে', granddaughter: 'পৌত্রী', mother: 'মাতা', paternalGrandmother: 'দাদী', maternalGrandmother: 'নানী', fullSister: 'সহোদর বোন', paternalSister: 'বৈমাত্রেয় বোন', maternalSister: 'বৈপিত্রীয় বোন', wife: 'স্ত্রী', freedSlaveFemale: 'মুক্ত দাসী', governmentTreasury: 'বাইতুল মাল' },
+  tr: { son: 'Oğul', grandson: 'Torun (Erkek)', father: 'Baba', grandfather: 'Dede', fullBrother: 'Öz Erkek Kardeş', paternalBrother: 'Baba Bir Kardeş', maternalBrother: 'Anne Bir Kardeş', nephewFull: 'Yeğen (Öz)', nephewPaternal: 'Yeğen (Baba Bir)', uncleFull: 'Amca (Öz)', unclePaternal: 'Amca (Baba Bir)', cousinFull: 'Kuzen (Amca Oğlu)', cousinPaternal: 'Kuzen (Baba Bir Amca Oğlu)', husband: 'Koca', freedSlaveMale: 'Azatlı Köle (E)', daughter: 'Kız', granddaughter: 'Torun (Kız)', mother: 'Anne', paternalGrandmother: 'Babaanne', maternalGrandmother: 'Anneanne', fullSister: 'Öz Kız Kardeş', paternalSister: 'Baba Bir Kız Kardeş', maternalSister: 'Anne Bir Kız Kardeş', wife: 'Karı', freedSlaveFemale: 'Azatlı Köle (K)', governmentTreasury: 'Beytülmal' },
+  id: { son: 'Anak Laki-laki', grandson: 'Cucu Laki-laki', father: 'Ayah', grandfather: 'Kakek', fullBrother: 'Saudara Kandung', paternalBrother: 'Saudara Sebapak', maternalBrother: 'Saudara Seibu', nephewFull: 'Keponakan Kandung', nephewPaternal: 'Keponakan Sebapak', uncleFull: 'Paman Kandung', unclePaternal: 'Paman Sebapak', cousinFull: 'Sepupu Kandung', cousinPaternal: 'Sepupu Sebapak', husband: 'Suami', freedSlaveMale: 'Budak Merdeka (L)', daughter: 'Anak Perempuan', granddaughter: 'Cucu Perempuan', mother: 'Ibu', paternalGrandmother: 'Nenek (Ayah)', maternalGrandmother: 'Nenek (Ibu)', fullSister: 'Saudari Kandung', paternalSister: 'Saudari Sebapak', maternalSister: 'Saudari Seibu', wife: 'Istri', freedSlaveFemale: 'Budak Merdeka (P)', governmentTreasury: 'Baitul Maal' },
+  fr: { son: 'Fils', grandson: 'Petit-fils', father: 'Père', grandfather: 'Grand-père', fullBrother: 'Frère germain', paternalBrother: 'Frère consanguin', maternalBrother: 'Frère utérin', nephewFull: 'Neveu germain', nephewPaternal: 'Neveu consanguin', uncleFull: 'Oncle germain', unclePaternal: 'Oncle consanguin', cousinFull: 'Cousin germain', cousinPaternal: 'Cousin consanguin', husband: 'Mari', freedSlaveMale: 'Affranchi (H)', daughter: 'Fille', granddaughter: 'Petite-fille', mother: 'Mère', paternalGrandmother: 'Grand-mère paternelle', maternalGrandmother: 'Grand-mère maternelle', fullSister: 'Sœur germaine', paternalSister: 'Sœur consanguine', maternalSister: 'Sœur utérine', wife: 'Femme', freedSlaveFemale: 'Affranchie (F)', governmentTreasury: 'Trésor Public' },
+  es: { son: 'Hijo', grandson: 'Nieto', father: 'Padre', grandfather: 'Abuelo', fullBrother: 'Hermano germano', paternalBrother: 'Hermano consanguíneo', maternalBrother: 'Hermano uterino', nephewFull: 'Sobrino germano', nephewPaternal: 'Sobrino consanguíneo', uncleFull: 'Tío germano', unclePaternal: 'Tío consanguíneo', cousinFull: 'Primo germano', cousinPaternal: 'Primo consanguíneo', husband: 'Esposo', freedSlaveMale: 'Liberto (H)', daughter: 'Hija', granddaughter: 'Nieta', mother: 'Madre', paternalGrandmother: 'Abuela paterna', maternalGrandmother: 'Abuela materna', fullSister: 'Hermana germana', paternalSister: 'Hermana consanguínea', maternalSister: 'Hermana uterina', wife: 'Esposa', freedSlaveFemale: 'Liberta (M)', governmentTreasury: 'Tesoro Público' }
 };
 
-const currencyTranslations: Record<string, Record<string, string>> = {
-  en: { USD: 'US Dollar', SAR: 'Saudi Riyal', PKR: 'Pakistani Rupee', INR: 'Indian Rupee', AED: 'UAE Dirham', EUR: 'Euro', GBP: 'British Pound' },
-  ur: { USD: 'امریکی ڈالر', SAR: 'سعودی ریال', PKR: 'پاکستانی روپیہ', INR: 'بھارتی روپیہ', AED: 'اماراتی درہم', EUR: 'یورو', GBP: 'برطانوی پاؤنڈ' },
-  ar: { USD: 'دولار أمريكي', SAR: 'ريال سعودي', PKR: 'روبية باكستانية', INR: 'روبية هندية', AED: 'درهم إماراتي', EUR: 'يورو', GBP: 'جنيه إسترليني' },
-  hi: { USD: 'अमेरिकी डॉलर', SAR: 'सऊदी रियाल', PKR: 'पाकिस्तानी रुपया', INR: 'भारतीय रुपया', AED: 'यूएई दिरहम', EUR: 'यूरो', GBP: 'ब्रिटिश पाउंड' }
+const currencyNames: Record<string, Record<string, string>> = {
+  ar: { USD: 'دولار أمريكي', EUR: 'يورو', GBP: 'جنيه إسترليني', SAR: 'ريال سعودي', AED: 'درهم إماراتي', PKR: 'روبية باكستانية', INR: 'روبية هندية', EGP: 'جنيه مصري', TRY: 'ليرة تركية', BDT: 'تاكا بنغلاديشي' },
+  ur: { USD: 'امریکی ڈالر', EUR: 'یورو', GBP: 'برطانوی پاؤنڈ', SAR: 'سعودی ریال', AED: 'اماراتی درہم', PKR: 'پاکستانی روپیہ', INR: 'بھارتی روپیہ', EGP: 'مصر پاؤنڈ', TRY: 'ترکش لیرا', BDT: 'بنگلہ دیشی ٹکا' },
+  hi: { USD: 'अमेरिकी डॉलर', EUR: 'यूरो', GBP: 'ब्रिटिश पाउंड', SAR: 'सऊदी रियाल', AED: 'यूएई दिरहम', PKR: 'पाकिस्तानी रुपया', INR: 'भारतीय रुपया', EGP: 'मिस्र पाउंड', TRY: 'तुर्की लीरा', BDT: 'बांग्लादेशी टका' },
+  bn: { USD: 'মার্কিন ডলার', EUR: 'ইউরো', GBP: 'ব্রিটিশ পাউন্ড', SAR: 'সৌদি রিয়াল', AED: 'ইউএই দিরহাম', PKR: 'পাকিস্তানি রুপি', INR: 'ভারতীয় রুপি', EGP: 'মিশরীয় পাউন্ড', TRY: 'তুর্কি লিরা', BDT: 'বাংলাদেশি টাকা' },
+  tr: { USD: 'ABD Doları', EUR: 'Euro', GBP: 'İngiliz Sterlini', SAR: 'Suudi Riyali', AED: 'BAE Dirhemi', PKR: 'Pakistan Rupisi', INR: 'Hindistan Rupisi', EGP: 'Mısır Lirası', TRY: 'Türk Lirası', BDT: 'Bangladeş Takası' },
+  id: { USD: 'Dolar AS', EUR: 'Euro', GBP: 'Pound Inggris', SAR: 'Riyal Saudi', AED: 'Dirham UEA', PKR: 'Rupee Pakistan', INR: 'Rupee India', EGP: 'Pound Mesir', TRY: 'Lira Turki', BDT: 'Taka Bangladesh' },
+  fr: { USD: 'Dollar US', EUR: 'Euro', GBP: 'Livre Sterling', SAR: 'Riyal Saoudien', AED: 'Dirham des EAU', PKR: 'Roupie Pakistanaise', INR: 'Roupie Indienne', EGP: 'Livre Égyptienne', TRY: 'Livre Turque', BDT: 'Taka du Bangladesh' },
+  es: { USD: 'Dólar Estadounidense', EUR: 'Euro', GBP: 'Libra Esterlina', SAR: 'Riyal Saudí', AED: 'Dírham de los EAU', PKR: 'Rupia Pakistaní', INR: 'Rupia India', EGP: 'Libra Egipcia', TRY: 'Lira Turca', BDT: 'Taka de Bangladesh' }
 };
 
 export const i18nStrings: Record<string, any> = {
   en: {
-    title: 'Inheritance Calculator',
-    subtitle: 'Al-Farā’iḍ/Mirath',
-    distributionAmount: 'Amount to Divide',
-    funeralExpenses: 'Funeral Expenses',
-    debts: 'Debts',
-    wasiyyat: '(UpTo 1/3)',
-    wasiyyatLimit: 'Up to 1/3',
-    currency: 'Currency',
-    fiqhSchool: 'Fiqh School',
-    language: 'Language',
-    deceasedGender: 'Deceased Gender',
-    heirsSelection: 'Select Heirs',
-    calculate: 'Calculate Shares',
-    recalculate: 'Recalculate',
-    reset: 'Start Over',
-    results: 'Results',
-    shareTable: 'Share Table',
-    familyTree: 'Visual Tree',
-    explanation: 'Detailed Explanations',
-    blockedBy: 'Blocked by',
-    male: 'Male (مرد)',
-    female: 'Female (عورت)',
-    summary: 'Asset Details',
-    deductions: 'Deductions',
-    noHeirs: 'Please select heirs on the left.',
-    heirs: heirTranslations.en,
-    currencies: currencyTranslations.en
+    title: 'Inheritance Calculator', subtitle: 'Al-Farā’iḍ/Mirath', distributionAmount: 'Amount to Divide', funeralExpenses: 'Funeral Expenses', debts: 'Debts', wasiyyat: 'Wasiyyat (UpTo 1/3)', wasiyyatLimit: 'Up to 1/3', currency: 'Currency', fiqhSchool: 'Fiqh School', language: 'Language', deceasedGender: 'Deceased Gender', heirsSelection: 'Select Heirs', calculate: 'Calculate Shares', recalculate: 'Recalculate', reset: 'Start Over', results: 'Results', shareTable: 'Share Table', familyTree: 'Visual Tree', explanation: 'Detailed Explanations', blockedBy: 'Blocked by', male: 'Male', female: 'Female', summary: 'Asset Details', deductions: 'Deductions', noHeirs: 'Please select heirs on the left.', heirs: heirTranslations.en, heirTypes: { Sharer: 'Sharer', Residuary: 'Residuary', Blocked: 'Blocked', Treasury: 'Treasury' }, schools: { Hanafi: 'Hanafi', Shafi: 'Shafi‘i', Maliki: 'Maliki', Hanbali: 'Hanbali' }, table: { heir: 'Heir', totalShare: 'Total Share', individualShare: 'Individual Share', totalAmount: 'Total Amount', count: 'Count', each: 'Each', perPerson: 'Per Person Share' }, excludedHeader: 'Excluded Heirs (Hajb)', reasonLabel: 'Reason', statusExcluded: 'Status: Fully Excluded', principleLabel: 'Inheritance Principles', quranRefLabel: 'Quran Reference', exp_blocked: 'Excluded due to higher priority heirs.', exp_no_share: 'No share remaining.', exp_husband_1: '1/2: No descendants.', exp_husband_2: '1/4: Descendants exist.', exp_wife_1: '1/4: No descendants.', exp_wife_2: '1/8: Descendants exist.', exp_son: 'Residuary (2:1).', exp_daughter_1: '1/2: Only daughter.', exp_daughter_2: '2/3: Multiple daughters.', exp_daughter_3: 'Residuary with brother.', exp_father_1: '1/6: Male descendants exist.', exp_father_2: 'Residuary: No male descendants.', exp_mother_1: '1/6: Descendants/siblings exist.', exp_mother_2: '1/3: No descendants/siblings.', exp_general: 'Rule-based share.', exp_treasury: 'No eligible heirs.', netEstateLabel: 'Net Estate for Distribution', totalDeductionsLabel: 'Total Deductions', deceasedLabel: 'Deceased', currencies: currencyNames.en || {}
   },
   ar: {
-    title: 'الفرائض',
-    subtitle: 'حاسبة المواريث',
-    distributionAmount: 'المبلغ للتقسيم',
-    funeralExpenses: 'نفقات الجنازة',
-    debts: 'الديون',
-    wasiyyat: '(حتى 1/3)',
-    wasiyyatLimit: 'حتى 1/3',
-    currency: 'العملة',
-    fiqhSchool: 'المذهب',
-    language: 'اللغة',
-    deceasedGender: 'جنس المتوفى',
-    heirsSelection: 'اختر الورثة',
-    calculate: 'احسب الأنصبة',
-    recalculate: 'إعادة الحساب',
-    reset: 'إعادة ضبط',
-    results: 'النتائج',
-    shareTable: 'جدول الأنصبة',
-    familyTree: 'شجرة العائلة',
-    explanation: 'الشرح التفصيلي',
-    blockedBy: 'محجوب بـ',
-    male: 'ذكر',
-    female: 'أنثى',
-    summary: 'تفاصيل الأصول',
-    deductions: 'الخصوم',
-    noHeirs: 'يرجى اختيار الورثة من القائمة.',
-    heirs: heirTranslations.ar,
-    currencies: currencyTranslations.ar
+    title: 'الفرائض', subtitle: 'حاسبة المواريث', distributionAmount: 'المبلغ للتقسيم', funeralExpenses: 'نفقات الجنازة', debts: 'الديون', wasiyyat: 'الوصية (حتى 1/3)', wasiyyatLimit: 'حتى 1/3', currency: 'العملة', fiqhSchool: 'المذهب', language: 'اللغة', deceasedGender: 'جنس المتوفى', heirsSelection: 'اختر الورثة', calculate: 'احسب الأنصبة', recalculate: 'إعادة الحساب', reset: 'إعادة ضبط', results: 'النتائج', shareTable: 'جدول الأنصبة', familyTree: 'شجرة العائلة', explanation: 'الشرح التفصيلي', blockedBy: 'محجوب بـ', male: 'ذكر', female: 'أنثى', summary: 'تفاصيل الأصول', deductions: 'الخصوم', noHeirs: 'يرجى اختيار الورثة من القائمة.', heirs: heirTranslations.ar, heirTypes: { Sharer: 'صاحب فرض', Residuary: 'عاصب', Blocked: 'محجوب', Treasury: 'بيت المال' }, schools: { Hanafi: 'حنفي', Shafi: 'شافعي', Maliki: 'مالكي', Hanbali: 'حنبلي' }, table: { heir: 'الوارث', totalShare: 'إجمالي النصيب', individualShare: 'نصيب الفرد', totalAmount: 'إجمالي المبلغ', count: 'العدد', each: 'لكل واحد', perPerson: 'نصيب الشخص الواحد' }, excludedHeader: 'الورثة المحجوبون (حجب حرمان)', reasonLabel: 'السبب', statusExcluded: 'الحالة: محجوب بالكامل', principleLabel: 'قواعد المواريث', quranRefLabel: 'الآية القرآنية', exp_blocked: 'محجوب لوجود ورثة أقرب.', exp_no_share: 'استنفاد التركة.', exp_husband_1: 'النصف لعدم وجود فرع وارث.', exp_husband_2: 'الربع لوجود فرع وارث.', exp_wife_1: 'الربع لعدم وجود فرع وارث.', exp_wife_2: 'الثمن لوجود فرع وارث.', exp_son: 'عاصب للذكر مثل حظ الأنثيين.', exp_daughter_1: 'النصف لانفرادها.', exp_daughter_2: 'الثلثان للتعدد.', exp_daughter_3: 'عاصبة بالغير.', exp_father_1: 'السدس لوجود فرع وارث ذكر.', exp_father_2: 'عاصب لعدم وجود فرع وارث ذكر.', exp_mother_1: 'السدس لوجود فرع وارث.', exp_mother_2: 'الثلث لعدم وجود فرع وارث.', exp_general: 'نصيب شرعي.', exp_treasury: 'لا يوجد ورثة مستحقون.', netEstateLabel: 'صافي التركة للتوزيع', totalDeductionsLabel: 'إجمالي الخصومات', deceasedLabel: 'المتوفى', currencies: currencyNames.ar || {}
   },
   ur: {
-    title: 'الفرائض',
-    subtitle: 'وراثت کیلکولیٹر',
-    distributionAmount: 'تقسیم کی رقم',
-    funeralExpenses: 'تجہیز و تکفین',
-    debts: 'قرض',
-    wasiyyat: '(ایک تہائی تک)',
-    wasiyyatLimit: 'ایک تہائی تک',
-    currency: 'کرنسی',
-    fiqhSchool: 'فقہی مسلک',
-    language: 'زبان',
-    deceasedGender: 'میت کی جنس',
-    heirsSelection: 'وارثین چنیں',
-    calculate: 'حصے معلوم کریں',
-    recalculate: 'دوبارہ حساب کریں',
-    reset: 'دوبارہ شروع کریں',
-    results: 'نتائج',
-    shareTable: 'حصص کا ٹیبل',
-    familyTree: 'شجرہ',
-    explanation: 'وضاحت',
-    blockedBy: 'بوجہ',
-    male: 'مرد',
-    female: 'عورت',
-    summary: 'رقم کی تفصیل',
-    deductions: 'اخراجات',
-    noHeirs: 'وارثوں کا انتخاب کریں۔',
-    heirs: heirTranslations.ur,
-    currencies: currencyTranslations.ur
+    title: 'الفرائض', subtitle: 'وراثت کیلکولیٹر', distributionAmount: 'تقسیم کی رقم', funeralExpenses: 'تجہیز و تکفین', debts: 'قرض', wasiyyat: 'وصیت (ایک تہائی تک)', wasiyyatLimit: 'ایک تہائی تک', currency: 'کرنسی', fiqhSchool: 'فقہی مسلک', language: 'زبان', deceasedGender: 'میت کی جنس', heirsSelection: 'وارثین چنیں', calculate: 'حصے معلوم کریں', recalculate: 'دوبارہ حساب کریں', reset: 'دوبارہ شروع کریں', results: 'نتائج', shareTable: 'حصص کا ٹیبل', familyTree: 'شجرہ', explanation: 'وضاحت', blockedBy: 'بوجہ', male: 'مرد', female: 'عورت', summary: 'رقم کی تفصیل', deductions: 'اخراجات', noHeirs: 'وارثوں کا انتخاب کریں۔', heirs: heirTranslations.ur, heirTypes: { Sharer: 'صاحب فرض', Residuary: 'عصبہ', Blocked: 'محروم/محجوب', Treasury: 'بیت المال' }, schools: { Hanafi: 'حنفی', Shafi: 'شافعی', Maliki: 'مالکی', Hanbali: 'حنبلی' }, table: { heir: 'وارث', totalShare: 'کل حصہ', individualShare: 'انفرادی حصہ', totalAmount: 'کل رقم', count: 'تعداد', each: 'فی کس', perPerson: 'فی وارث حصہ' }, excludedHeader: 'محروم وارثین (حجب حرمان)', reasonLabel: 'وجہ', statusExcluded: 'حالت: مکمل طور پر محروم', principleLabel: 'اصولِ وراثت', quranRefLabel: 'قرآنی آیت', exp_blocked: 'قریب ترین وارث کی موجودگی۔', exp_no_share: 'ترکہ ختم ہوگیا۔', exp_husband_1: '1/2: اولاد نہ ہونے پر۔', exp_husband_2: '1/4: اولاد ہونے پر۔', exp_wife_1: '1/4: اولاد نہ ہونے پر۔', exp_wife_2: '1/8: اولاد ہونے پر۔', exp_son: 'عصبہ (2:1)۔', exp_daughter_1: '1/2: تنہا ہونے پر۔', exp_daughter_2: '2/3: ایک سے زائد ہونے پر۔', exp_daughter_3: 'عصبہ بالغیر۔', exp_father_1: '1/6: نرینہ اولاد ہونے پر۔', exp_father_2: 'عصبہ: نرینہ اولاد نہ ہونے پر۔', exp_mother_1: '1/6: اولاد/بہن بھائیوں پر۔', exp_mother_2: '1/3: اولاد/بہن بھائی نہ ہونے پر۔', exp_general: 'شرعی حصہ۔', exp_treasury: 'بیت المال منتقل۔', netEstateLabel: 'تقسیم کے لیے کل رقم', totalDeductionsLabel: 'کل اخراجات', deceasedLabel: 'مرحوم/مرحومہ', currencies: currencyNames.ur || {}
   },
   hi: {
-    title: 'अल-फराइज़',
-    subtitle: 'विरासत कैलकुलेटर',
-    distributionAmount: 'विभाजित की जाने वाली राशि',
-    funeralExpenses: 'अंतिम संस्कार का खर्च',
-    debts: 'कर्ज',
-    wasiyyat: '(1/3 तक)',
-    wasiyyatLimit: '1/3 तक',
-    currency: 'मुद्रा',
-    fiqhSchool: 'फ़िक़्ह स्कूल',
-    language: 'भाषा',
-    deceasedGender: 'मृतक का लिंग',
-    heirsSelection: 'वारिस चुनें',
-    calculate: 'हिस्से की गणना करें',
-    recalculate: 'पुनः गणना',
-    reset: 'पुनः आरंभ करें',
-    results: 'परिणाम',
-    shareTable: 'हिस्सा तालिका',
-    familyTree: 'पारिवारिक ट्री',
-    explanation: 'विस्तृत विवरण',
-    blockedBy: 'द्वारा अवरुद्ध',
-    male: 'पुरुष',
-    female: 'स्त्री',
-    summary: 'संपत्ति का विवरण',
-    deductions: 'कटौती',
-    noHeirs: 'कृपया बाएं वारिस चुनें।',
-    heirs: heirTranslations.hi,
-    currencies: currencyTranslations.hi
+    title: 'अल-फराइज़', subtitle: 'विरासत कैलकुलेटर', distributionAmount: 'विभाजित राशि', funeralExpenses: 'अंतिम संस्कार खर्च', debts: 'कर्ज', wasiyyat: 'वसीयत (1/3 तक)', wasiyyatLimit: '1/3 तक', currency: 'मुद्रा', fiqhSchool: 'फ़िक़्ह स्कूल', language: 'भाषा', deceasedGender: 'मृतक लिंग', heirsSelection: 'वारिस चुनें', calculate: 'गणना करें', recalculate: 'पुनः गणना', reset: 'आरंभ करें', results: 'परिणाम', shareTable: 'हिस्सा तालिका', familyTree: 'फैमिली ट्री', explanation: 'विवरण', blockedBy: 'द्वारा वर्जित', male: 'पुरुष', female: 'महिला', summary: 'संपत्ति विवरण', deductions: 'कटौती', noHeirs: 'वारिस चुनें।', heirs: heirTranslations.hi, heirTypes: { Sharer: 'हिस्सेदार', Residuary: 'अवशेषी', Blocked: 'वर्जित', Treasury: 'राजकोष' }, schools: { Hanafi: 'हनफी', Shafi: 'शाफ़ई', Maliki: 'मालिकी', Hanbali: 'हंबली' }, table: { heir: 'वारिस', totalShare: 'कुल हिस्सा', individualShare: 'व्यक्तिगत हिस्सा', totalAmount: 'कुल राशि', count: 'संख्या', each: 'प्रत्येक', perPerson: 'प्रति व्यक्ति' }, excludedHeader: 'वर्जित वारिस', reasonLabel: 'कारण', statusExcluded: 'पूरी तरह वर्जित', principleLabel: 'विरासत सिद्धांत', quranRefLabel: 'कुरान संदर्भ', exp_blocked: 'उच्च प्राथमिकता वाले वारिस मौजूद हैं।', exp_no_share: 'हिस्सा समाप्त।', exp_husband_1: '1/2: कोई वंशज नहीं।', exp_husband_2: '1/4: वंशज मौजूद हैं।', exp_wife_1: '1/4: कोई वंशज नहीं।', exp_wife_2: '1/8: वंशज मौजूद हैं।', exp_son: 'अवशेषी (2:1)।', exp_daughter_1: '1/2: इकलौती बेटी।', exp_daughter_2: '2/3: अनेक बेटियाँ।', exp_daughter_3: 'भाई के साथ अवशेषी।', exp_father_1: '1/6: पुरुष वंशज मौजूद।', exp_father_2: 'अवशेषी: पुरुष वंशज नहीं।', exp_mother_1: '1/6: वंशज मौजूद।', exp_mother_2: '1/3: कोई वंशज नहीं।', exp_general: 'नियम आधारित हिस्सा।', exp_treasury: 'सरकारी खजाने में।', netEstateLabel: 'वितरण राशि', totalDeductionsLabel: 'कुल कटौती', deceasedLabel: 'मृतक', currencies: currencyNames.hi || {}
+  },
+  bn: {
+    title: 'উত্তরাধিকার ক্যালকুলেটর', subtitle: 'আল-ফরায়েজ', distributionAmount: 'বিভাজ্য সম্পদ', funeralExpenses: 'দাফন খরচ', debts: 'ঋণ', wasiyyat: 'ওসিয়ত (১/৩ পর্যন্ত)', wasiyyatLimit: '১/৩ পর্যন্ত', currency: 'কারেন্সি', fiqhSchool: 'মাযহাব', language: 'ভাষা', deceasedGender: 'মৃতের লিঙ্গ', heirsSelection: 'ওয়ারিশ নির্বাচন', calculate: 'হিসাব করুন', recalculate: 'পুনরায় হিসাব', reset: 'শুরু থেকে', results: 'ফলাফল', shareTable: 'বন্টন তালিকা', familyTree: 'বংশবৃক্ষ', explanation: 'বিস্তারিত ব্যাখ্যা', blockedBy: 'দ্বারা বঞ্চিত', male: 'পুরুষ', female: 'নারী', summary: 'সম্পদ বিবরণ', deductions: 'খরচসমূহ', noHeirs: 'ওয়ারিশ নির্বাচন করুন।', heirs: heirTranslations.bn, heirTypes: { Sharer: 'অংশীদার', Residuary: 'অবশিষ্টাংশভোগী', Blocked: 'বঞ্চিত', Treasury: 'বাইতুল মাল' }, schools: { Hanafi: 'হানাফী', Shafi: 'শাফেয়ী', Maliki: 'মালিকী', Hanbali: 'হাম্বলী' }, table: { heir: 'ওয়ারিশ', totalShare: 'মোট অংশ', individualShare: 'ব্যক্তিগত অংশ', totalAmount: 'মোট টাকা', count: 'সংখ্যা', each: 'প্রতিটি', perPerson: 'মাথাপিছু অংশ' }, excludedHeader: 'বঞ্চিত ওয়ারিশগণ', reasonLabel: 'কারণ', statusExcluded: 'সম্পূর্ণ বঞ্চিত', principleLabel: 'উত্তরাধিকার নীতিমালা', quranRefLabel: 'কুরআনের রেফারেন্স', exp_blocked: 'উচ্চ অগ্রাধিকার ওয়ারিশ উপস্থিত।', exp_no_share: 'কোন অংশ অবশিষ্ট নেই।', exp_husband_1: '১/২: সন্তান নেই।', exp_husband_2: '১/৪: সন্তান আছে।', exp_wife_1: '১/৪: সন্তান নেই।', exp_wife_2: '১/৮: সন্তান আছে।', exp_son: 'অবশিষ্টাংশভোগী (২:১)।', exp_daughter_1: '১/২: একমাত্র কন্যা।', exp_daughter_2: '২/৩: একাধিক কন্যা।', exp_daughter_3: 'ভাইয়ের সাথে আসাবা।', exp_father_1: '১/৬: পুত্র বংশধর আছে।', exp_father_2: 'আসাবা: পুত্র বংশধর নেই।', exp_mother_1: '১/৬: সন্তান/ভাইবোন আছে।', exp_mother_2: '১/৩: সন্তান/ভাইবোন নেই।', exp_general: 'শরীয়াহ সম্মত অংশ।', exp_treasury: 'বাইতুল মালে স্থানান্তরিত।', netEstateLabel: 'বন্টনযোগ্য সম্পদ', totalDeductionsLabel: 'মোট খরচ', deceasedLabel: 'মৃত ব্যক্তি', currencies: currencyNames.bn || {}
+  },
+  tr: {
+    title: 'Miras Hesaplayıcı', subtitle: 'el-Feraiz', distributionAmount: 'Dağıtılacak Tutar', funeralExpenses: 'Cenaze Masrafı', debts: 'Borçlar', wasiyyat: 'Vasiyet (1/3\'e Kadar)', wasiyyatLimit: '1/3\'e Kadar', currency: 'Para Birimi', fiqhSchool: 'Mezhep', language: 'Dil', deceasedGender: 'Vefat Edenin Cinsiyeti', heirsSelection: 'Varisleri Seç', calculate: 'Hesapla', recalculate: 'Yeniden Hesapla', reset: 'Baştan Başla', results: 'Sonuçlar', shareTable: 'Pay Tablosu', familyTree: 'Soyağacı', explanation: 'Detaylı Açıklama', blockedBy: 'Engellenen', male: 'Erkek', female: 'Kadın', summary: 'Varlık Detayları', deductions: 'Kesintiler', noHeirs: 'Varis seçiniz.', heirs: heirTranslations.tr, heirTypes: { Sharer: 'Farz Sahibi', Residuary: 'Asabe', Blocked: 'Mahcup', Treasury: 'Beytülmal' }, schools: { Hanafi: 'Hanefi', Shafi: 'Şafii', Maliki: 'Maliki', Hanbali: 'Hanbeli' }, table: { heir: 'Varis', totalShare: 'Toplam Pay', individualShare: 'Kişi Başı Pay', totalAmount: 'Toplam Tutar', count: 'Sayı', each: 'Her biri', perPerson: 'Kişi başı hisse' }, excludedHeader: 'Dışlanan Varisler', reasonLabel: 'Neden', statusExcluded: 'Durum: Tamamen Dışlanmış', principleLabel: 'Miras İlkeleri', quranRefLabel: 'Kur\'an Referansı', exp_blocked: 'Öncelikli varisler nedeniyle dışlanmış.', exp_no_share: 'Pay kalmadı.', exp_husband_1: '1/2: Çocuk yok.', exp_husband_2: '1/4: Çocuk var.', exp_wife_1: '1/4: Çocuk yok.', exp_wife_2: '1/8: Çocuk var.', exp_son: 'Asabe (2:1).', exp_daughter_1: '1/2: Tek kız.', exp_daughter_2: '2/3: Birden fazla kız.', exp_daughter_3: 'Erkek kardeşle asabe.', exp_father_1: '1/6: Erkek çocuk var.', exp_father_2: 'Asabe: Erkek çocuk yok.', exp_mother_1: '1/6: Çocuk/kardeş var.', exp_mother_2: '1/3: Çocuk/kardeş yok.', exp_general: 'Fıkhi kurala göre pay.', exp_treasury: 'Varis bulunamadı.', netEstateLabel: 'Net Miras', totalDeductionsLabel: 'Toplam Kesinti', deceasedLabel: 'Vefat Eden', currencies: currencyNames.tr || {}
+  },
+  id: {
+    title: 'Kalkulator Waris', subtitle: 'Al-Farā’iḍ', distributionAmount: 'Total Harta', funeralExpenses: 'Biaya Jenazah', debts: 'Hutang', wasiyyat: 'Wasiat (Maks 1/3)', wasiyyatLimit: 'Maks 1/3', currency: 'Mata Uang', fiqhSchool: 'Madzhab', language: 'Bahasa', deceasedGender: 'Jenis Kelamin Mayit', heirsSelection: 'Pilih Ahli Waris', calculate: 'Hitung Waris', recalculate: 'Hitung Ulang', reset: 'Mulai Baru', results: 'Hasil', shareTable: 'Tabel Bagian', familyTree: 'Pohon Visual', explanation: 'Penjelasan Detail', blockedBy: 'Terhalang oleh', male: 'Laki-laki', female: 'Perempuan', summary: 'Detail Aset', deductions: 'Potongan', noHeirs: 'Pilih ahli waris.', heirs: heirTranslations.id, heirTypes: { Sharer: 'Ashabul Furud', Residuary: 'Ashabah', Blocked: 'Mahjub', Treasury: 'Baitul Maal' }, schools: { Hanafi: 'Hanafi', Shafi: 'Syafi\'i', Maliki: 'Maliki', Hanbali: 'Hambali' }, table: { heir: 'Ahli Waris', totalShare: 'Total Bagian', individualShare: 'Bagian Per Orang', totalAmount: 'Total Nilai', count: 'Jumlah', each: 'Masing-masing', perPerson: 'Bagian Per Jiwa' }, excludedHeader: 'Ahli Waris Terhijab', reasonLabel: 'Alasan', statusExcluded: 'Status: Terhijab Penuh', principleLabel: 'Prinsip Waris', quranRefLabel: 'Referensi Al-Quran', exp_blocked: 'Terhijab oleh ahli waris yang lebih dekat.', exp_no_share: 'Harta habis terbagi.', exp_husband_1: '1/2: Tidak ada keturunan.', exp_husband_2: '1/4: Ada keturunan.', exp_wife_1: '1/4: Tidak ada keturunan.', exp_wife_2: '1/8: Ada keturunan.', exp_son: 'Ashabah (2:1).', exp_daughter_1: '1/2: Anak tunggal.', exp_daughter_2: '2/3: Lebih dari satu anak.', exp_daughter_3: 'Ashabah bersama saudara laki-laki.', exp_father_1: '1/6: Ada keturunan laki-laki.', exp_father_2: 'Ashabah: Tidak ada keturunan laki-laki.', exp_mother_1: '1/6: Ada keturunan/saudara.', exp_mother_2: '1/3: Tidak ada keturunan/saudara.', exp_general: 'Bagian sesuai kaidah.', exp_treasury: 'Diserahkan ke Baitul Maal.', netEstateLabel: 'Netto Warisan', totalDeductionsLabel: 'Total Potongan', deceasedLabel: 'Jenazah', currencies: currencyNames.id || {}
+  },
+  fr: {
+    title: 'Calculateur d\'Héritage', subtitle: 'Al-Farā’iḍ', distributionAmount: 'Montant à Diviser', funeralExpenses: 'Frais Funéraires', debts: 'Dettes', wasiyyat: 'Wasiyyat (Max 1/3)', wasiyyatLimit: 'Max 1/3', currency: 'Devise', fiqhSchool: 'École Juridique', language: 'Langue', deceasedGender: 'Sexe du Défunt', heirsSelection: 'Sélection des Héritiers', calculate: 'Calculer', recalculate: 'Recalculer', reset: 'Réinitialiser', results: 'Résultats', shareTable: 'Tableau des Parts', familyTree: 'Arbre Visuel', explanation: 'Explications Détaillées', blockedBy: 'Exclu par', male: 'Homme', female: 'Femme', summary: 'Détails des Actifs', deductions: 'Déductions', noHeirs: 'Veuillez choisir les héritiers.', heirs: heirTranslations.fr, heirTypes: { Sharer: 'Héritier à part fixe', Residuary: 'Asaba', Blocked: 'Exclu', Treasury: 'Trésor' }, schools: { Hanafi: 'Hanafite', Shafi: 'Chaféite', Maliki: 'Malikite', Hanbali: 'Hanbalite' }, table: { heir: 'Héritier', totalShare: 'Part Totale', individualShare: 'Part Individuelle', totalAmount: 'Montant Total', count: 'Nombre', each: 'Chaque', perPerson: 'Part par personne' }, excludedHeader: 'Héritiers Exclus (Hajb)', reasonLabel: 'Raison', statusExcluded: 'Statut : Entièrement Exclu', principleLabel: 'Principes de Succession', quranRefLabel: 'Référence Coranique', exp_blocked: 'Exclu en raison d\'héritiers prioritaires.', exp_no_share: 'Patrimoine épuisé.', exp_husband_1: '1/2 : Pas de descendants.', exp_husband_2: '1/4 : Descendants existants.', exp_wife_1: '1/4 : Pas de descendants.', exp_wife_2: '1/8 : Descendants existants.', exp_son: 'Asaba (2:1).', exp_daughter_1: '1/2 : Fille unique.', exp_daughter_2: '2/3 : Plusieurs filles.', exp_daughter_3: 'Asaba avec le frère.', exp_father_1: '1/6 : Descendants mâles existants.', exp_father_2: 'Asaba : Pas de descendants mâles.', exp_mother_1: '1/6 : Descendants/fratrie existants.', exp_mother_2: '1/3 : Pas de descendants/fratrie.', exp_general: 'Part selon les règles.', exp_treasury: 'Transféré au Trésor Public.', netEstateLabel: 'Héritage Net', totalDeductionsLabel: 'Total des Déductions', deceasedLabel: 'Défunt', currencies: currencyNames.fr || {}
+  },
+  es: {
+    title: 'Calculadora de Herencia', subtitle: 'Al-Farā’iḍ', distributionAmount: 'Monto a Dividir', funeralExpenses: 'Gastos Funerarios', debts: 'Deudas', wasiyyat: 'Wasiyyat (Hasta 1/3)', wasiyyatLimit: 'Hasta 1/3', currency: 'Moneda', fiqhSchool: 'Escuela Jurídica', language: 'Idioma', deceasedGender: 'Género del Difunto', heirsSelection: 'Seleccionar Herederos', calculate: 'Calcular', recalculate: 'Recalcular', reset: 'Reiniciar', results: 'Resultados', shareTable: 'Tabla de Reparto', familyTree: 'Árbol Visual', explanation: 'Explicaciones Detalladas', blockedBy: 'Excluido por', male: 'Hombre', female: 'Mujer', summary: 'Detalles de Activos', deductions: 'Deducciones', noHeirs: 'Seleccione herederos.', heirs: heirTranslations.es, heirTypes: { Sharer: 'Heredero con cuota fija', Residuary: 'Asaba', Blocked: 'Excluido', Treasury: 'Tesoro' }, schools: { Hanafi: 'Hanafí', Shafi: 'Shafi\'í', Maliki: 'Malikí', Hanbali: 'Hanbalí' }, table: { heir: 'Heredero', totalShare: 'Cuota Total', individualShare: 'Cuota Individual', totalAmount: 'Monto Total', count: 'Cantidad', each: 'Cada uno', perPerson: 'Cuota por persona' }, excludedHeader: 'Herederos Excluidos', reasonLabel: 'Razón', statusExcluded: 'Estado: Totalmente Excluido', principleLabel: 'Principios de Herencia', quranRefLabel: 'Referencia Coránica', exp_blocked: 'Excluido por herederos de mayor prioridad.', exp_no_share: 'No queda patrimonio.', exp_husband_1: '1/2: Sin descendientes.', exp_husband_2: '1/4: Con descendientes.', exp_wife_1: '1/4: Sin descendientes.', exp_wife_2: '1/8: Con descendientes.', exp_son: 'Asaba (2:1).', exp_daughter_1: '1/2: Hija única.', exp_daughter_2: '2/3: Varias hijas.', exp_daughter_3: 'Asaba con el hermano.', exp_father_1: '1/6: Con descendientes varones.', exp_father_2: 'Asaba: Sin descendientes varones.', exp_mother_1: '1/6: Con descendientes/hermanos.', exp_mother_2: '1/3: Sin descendientes/hermanos.', exp_general: 'Cuota según reglas.', exp_treasury: 'Transferido al Tesoro Público.', netEstateLabel: 'Herencia Neta', totalDeductionsLabel: 'Total Deducciones', deceasedLabel: 'Difunto', currencies: currencyNames.es || {}
   }
 };
