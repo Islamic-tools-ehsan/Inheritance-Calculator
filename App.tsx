@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { 
   InheritanceState, 
@@ -74,7 +73,6 @@ const App: React.FC = () => {
     });
   }, [state.currency, state.language, t.currencies]);
 
-  // Reactive Results for Blocking Logic
   const results = useMemo(() => {
     return calculateInheritance(state);
   }, [state]);
@@ -115,7 +113,6 @@ const App: React.FC = () => {
       ...prev,
       heirs: { ...prev.heirs, [key]: val }
     }));
-    // We don't force setIsCalculated(false) anymore to allow real-time blocking feedback
   };
 
   const handleNumericInput = (field: keyof InheritanceState, value: number) => {
@@ -124,7 +121,6 @@ const App: React.FC = () => {
       resetAll();
       return;
     }
-    // Wasiyyat 1/3 Limit Check
     if (field === 'wasiyyat' && value > state.totalEstate / 3) {
        triggerError(t.wasiyyatLimit);
        return;
@@ -137,10 +133,9 @@ const App: React.FC = () => {
     window.print();
   };
 
-  // Define renderDeductionInput to fix "Cannot find name 'renderDeductionInput'" errors
   const renderDeductionInput = (label: string, value: number, field: keyof InheritanceState) => (
     <div key={field}>
-      <label className="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest">{label}</label>
+      <label className="block text-[20px] font-black uppercase text-slate-400 mb-4 tracking-widest">{label}</label>
       <div className="relative">
         <input 
           type="number" 
@@ -166,7 +161,7 @@ const App: React.FC = () => {
     const blocker = results.find(r => r.heirId === h.id)?.blockedBy;
 
     let containerClass = "p-4 md:p-5 rounded-[2rem] border-4 transition-all group relative overflow-hidden ";
-    let labelClass = "block text-[10px] font-black uppercase mb-2 md:mb-3 leading-tight ";
+    let labelClass = "block text-[20px] font-black uppercase mb-3 md:mb-5 leading-tight ";
     let inputClass = "w-full border-none rounded-xl text-lg md:text-2xl font-black py-2 md:py-3 px-3 md:px-5 outline-none transition-all shadow-inner ";
 
     if (isBlocked) {
@@ -190,21 +185,25 @@ const App: React.FC = () => {
       <div key={h.id} className={containerClass}>
         <label className={labelClass}>
           {translatedName} {limitDisplay}
-          {isBlocked && blocker && (
-            <span className="block text-[8px] mt-1 font-black text-red-600 animate-pulse">
-              {t.blockedBy} {blocker}
-            </span>
-          )}
         </label>
-        <input 
-          type="number" 
-          min="0" 
-          value={isBlocked ? '' : (count || '')}
-          placeholder="0"
-          disabled={isBlocked}
-          onChange={(e) => handleHeirChange(h.id, Number(e.target.value))}
-          className={inputClass}
-        />
+        <div className="relative">
+          <input 
+            type="number" 
+            min="0" 
+            value={isBlocked ? '' : (count || '')}
+            placeholder={isBlocked ? `${t.blockedBy} ${blocker}` : "0"}
+            disabled={isBlocked}
+            onChange={(e) => handleHeirChange(h.id, Number(e.target.value))}
+            className={inputClass}
+          />
+          {isBlocked && (
+            <div className="absolute inset-0 flex items-center px-5 pointer-events-none">
+              <span className="text-red-600 font-black text-xs md:text-sm italic uppercase truncate">
+                {t.blockedBy} {blocker}
+              </span>
+            </div>
+          )}
+        </div>
       </div>
     );
   };
@@ -272,10 +271,10 @@ const App: React.FC = () => {
               <Calculator className="text-orange-600" size={28} />
               {t.summary}
             </h2>
-            <div className="space-y-8">
+            <div className="space-y-10">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest">{t.distributionAmount}</label>
+                  <label className="block text-[20px] font-black uppercase text-slate-400 mb-4 tracking-widest">{t.distributionAmount}</label>
                   <div className="relative">
                     <input 
                       type="number" 
@@ -291,7 +290,7 @@ const App: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest">{t.fiqhSchool}</label>
+                  <label className="block text-[20px] font-black uppercase text-slate-400 mb-4 tracking-widest">{t.fiqhSchool}</label>
                   <select 
                     value={state.school} 
                     onChange={(e) => {
@@ -306,7 +305,7 @@ const App: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-[10px] font-black uppercase text-slate-400 mb-3 tracking-widest">{t.deceasedGender}</label>
+                <label className="block text-[20px] font-black uppercase text-slate-400 mb-4 tracking-widest">{t.deceasedGender}</label>
                 <div className="flex p-2 bg-slate-100 rounded-[2.5rem] border-2 border-slate-200">
                   <button 
                     onClick={() => {
@@ -336,7 +335,7 @@ const App: React.FC = () => {
               <MinusCircle className="text-red-500" size={28} />
               {t.deductions}
             </h2>
-            <div className="space-y-6">
+            <div className="space-y-10">
               {renderDeductionInput(t.funeralExpenses, state.funeralExpenses, 'funeralExpenses')}
               {renderDeductionInput(t.debts, state.debts, 'debts')}
               {renderDeductionInput(t.wasiyyat, state.wasiyyat, 'wasiyyat')}
@@ -348,7 +347,7 @@ const App: React.FC = () => {
               <Users className="text-orange-600" size={28} />
               {t.heirsSelection}
             </h2>
-            <div className="grid grid-cols-2 gap-4 md:gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
               {/* Spouses filter */}
               {MALE_HEIRS.filter(h => h.id === 'husband').map(renderHeirInput)}
               {FEMALE_HEIRS.filter(h => h.id === 'wife').map(renderHeirInput)}
@@ -388,7 +387,6 @@ const App: React.FC = () => {
             </div>
           ) : (
             <div className="space-y-10 animate-in fade-in slide-in-from-bottom-10 duration-500 print-container">
-              {/* Results blocks same as before... */}
               <div className="bg-white p-6 md:p-10 rounded-[3.5rem] shadow-2xl border border-slate-100 overflow-hidden page-break-after">
                 <div className="print-only mb-10 text-center border-b-4 border-orange-600 pb-8">
                   <h1 className="text-4xl font-black font-arabic">{t.title}</h1>
@@ -405,7 +403,7 @@ const App: React.FC = () => {
                 <div className="space-y-8">
                   <div className="bg-gradient-to-br from-slate-900 to-slate-800 p-8 md:p-12 rounded-[3rem] shadow-2xl text-white flex flex-col md:flex-row justify-between items-center gap-6">
                     <div className="w-full md:w-auto">
-                      <p className="text-[10px] font-black uppercase mb-2 tracking-widest opacity-80">{t.distributionAmount}</p>
+                      <p className="text-xl font-black uppercase mb-2 tracking-widest opacity-80">{t.distributionAmount}</p>
                       <p className="text-5xl md:text-7xl font-black flex items-baseline gap-2">
                         {state.totalEstate.toLocaleString()}
                         <span className="text-2xl font-bold opacity-70">{state.currency}</span>
@@ -419,11 +417,11 @@ const App: React.FC = () => {
                     </div>
                     <div className="flex gap-4">
                       <div className="bg-white/10 p-6 rounded-3xl backdrop-blur-sm text-center min-w-[120px]">
-                        <p className="text-[10px] font-black uppercase opacity-70 mb-1">{t.fiqhSchool}</p>
+                        <p className="text-xl font-black uppercase opacity-70 mb-1">{t.fiqhSchool}</p>
                         <p className="text-xl font-black">{t.schools[state.school] || state.school}</p>
                       </div>
                       <div className="bg-white/10 p-6 rounded-3xl backdrop-blur-sm text-center min-w-[120px]">
-                        <p className="text-[10px] font-black uppercase opacity-70 mb-1">{t.deceasedGender}</p>
+                        <p className="text-xl font-black uppercase opacity-70 mb-1">{t.deceasedGender}</p>
                         <p className="text-xl font-black">{state.deceasedGender === DeceasedGender.Male ? t.male : t.female}</p>
                       </div>
                     </div>

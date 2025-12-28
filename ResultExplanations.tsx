@@ -13,7 +13,6 @@ export const ResultExplanations: React.FC<ResultExplanationsProps> = ({ results,
 
   return (
     <div className="space-y-10">
-      {/* SHARE TABLE PAGE */}
       <div className="bg-white rounded-[3.5rem] shadow-2xl shadow-slate-200 border border-slate-100 overflow-hidden page-break-after">
         <div className="p-10 border-b border-slate-100 flex items-center gap-4">
           <List className="text-orange-500" size={28} />
@@ -24,24 +23,26 @@ export const ResultExplanations: React.FC<ResultExplanationsProps> = ({ results,
             <thead className="bg-slate-50 text-[12px] font-black text-slate-400 uppercase tracking-[0.3em]">
               <tr>
                 <th className="px-10 py-7">{t.table.heir}</th>
-                <th className="px-10 py-7">{t.table.totalShare}</th>
+                <th className="px-10 py-7">{t.table.totalShare} / Justification</th>
                 <th className="px-10 py-7">{t.table.individualShare}</th>
                 <th className="px-10 py-7 text-right">{t.table.totalAmount}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-black text-slate-900">
               {results.filter(r => r.count > 0 || r.isBlocked).map((r, i) => (
-                <tr key={i} className={`hover:bg-orange-50/50 transition-colors ${r.isBlocked ? 'opacity-30 grayscale' : ''}`}>
+                <tr key={i} className={`hover:bg-orange-50/50 transition-colors ${r.isBlocked ? 'bg-red-50/40 opacity-50' : ''}`}>
                   <td className="px-10 py-8">
                     <div>
                       <p className="font-black text-xl font-arabic">{r.heirName}</p>
                       <p className="text-[11px] text-slate-400 font-black uppercase tracking-widest mt-1">{t.table.count}: {r.count}</p>
-                      {r.isBlocked && <span className="text-[11px] font-black text-red-500 uppercase tracking-widest mt-1 block">{t.blockedBy} {r.blockedBy}</span>}
                     </div>
                   </td>
-                  <td className="px-10 py-8">
+                  <td className="px-10 py-8 max-w-xs">
                     <p className="font-black text-2xl text-slate-800">{r.sharePercentage.toFixed(2)}%</p>
-                    <p className="text-sm text-orange-600 font-mono">{r.shareFraction}</p>
+                    <p className="text-sm text-orange-600 font-mono mb-2">{r.shareFraction}</p>
+                    <p className={`text-[11px] leading-relaxed font-bold ${r.isBlocked ? 'text-red-600 italic' : 'text-slate-500'}`}>
+                       {r.isBlocked ? `${t.blockedBy} ${r.blockedBy}` : r.explanation}
+                    </p>
                   </td>
                   <td className="px-10 py-8">
                     {r.count > 1 && !r.isBlocked ? (
@@ -68,7 +69,6 @@ export const ResultExplanations: React.FC<ResultExplanationsProps> = ({ results,
         </div>
       </div>
 
-      {/* EXPLANATIONS PAGE */}
       <section className="page-break-before">
         <div className="flex items-center gap-4 mb-8 px-6">
           <BookOpen className="text-orange-600" size={32} />
@@ -101,20 +101,12 @@ export const ResultExplanations: React.FC<ResultExplanationsProps> = ({ results,
                 {r.explanation}
               </p>
 
-              {r.quranReference && (
-                <div className="bg-slate-50 p-6 rounded-[1.5rem] border-2 border-slate-100 flex items-start gap-4">
-                  <HelpCircle size={20} className="text-slate-400 mt-1" />
-                  <p className="text-sm font-bold text-slate-500 leading-relaxed italic">
-                    {t.quranRefLabel} {r.quranReference}.
-                  </p>
-                </div>
-              )}
+              {r.quranReference && (ConstructedReference(r.quranReference, t))}
             </div>
           ))}
         </div>
       </section>
 
-      {/* BLOCKED HEIRS PAGE (IF ANY) */}
       {blockedHeirs.length > 0 && (
         <section className="mt-16 page-break-before">
           <div className="flex items-center gap-4 mb-8 px-6">
@@ -144,7 +136,7 @@ export const ResultExplanations: React.FC<ResultExplanationsProps> = ({ results,
 
                 <div className="bg-white p-6 rounded-[2rem] border-2 border-red-100 mb-6">
                   <p className="text-lg text-red-800 font-bold leading-relaxed">
-                    <span className="text-red-600 underline">{t.reasonLabel}:</span> {r.explanation}
+                    <span className="text-red-600 underline">{t.reasonLabel}:</span> {t.blockedBy} {r.blockedBy}
                   </p>
                 </div>
               </div>
@@ -155,3 +147,12 @@ export const ResultExplanations: React.FC<ResultExplanationsProps> = ({ results,
     </div>
   );
 };
+
+const ConstructedReference = (ref: string, t: any) => (
+  <div className="bg-slate-50 p-6 rounded-[1.5rem] border-2 border-slate-100 flex items-start gap-4">
+    <HelpCircle size={20} className="text-slate-400 mt-1" />
+    <p className="text-sm font-bold text-slate-500 leading-relaxed italic">
+      {t.quranRefLabel} {ref}.
+    </p>
+  </div>
+);
