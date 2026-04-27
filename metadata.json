@@ -1,5 +1,6 @@
 {
   "name": "WIRASAT Calculator: Al-Farā’iḍ/ Mirath/Inheritance",
   "description": "A comprehensive, professionally designed Islamic Inheritance Calculator based on Sunni Fiqh (Hanafi, Shafi'i, Maliki, Hanbali). Supports 20+ languages and multiple currencies.",
-  "requestFramePermissions": []
+  "requestFramePermissions": [],
+  "majorCapabilities": []
 }
