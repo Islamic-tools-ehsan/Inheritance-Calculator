@@ -1,6 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script>
+        (function() {
+            try {
+                const authData = localStorage.getItem('inheritanceAccess');
+                if (!authData) throw new Error('No token');
+                
+                const data = JSON.parse(authData);
+                const now = new Date().getTime();
+                
+                // Check if token exists and is not expired
+                if (!data.token || (data.expiry && now > data.expiry)) {
+                    throw new Error('Expired or invalid');
+                }
+            } catch (e) {
+                window.location.href = 'https://islamistechnology.com/?auth=inheritance';
+            }
+        })();
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Al-Farā’iḍ Calculator</title>
