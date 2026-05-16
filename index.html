@@ -1,47 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script>
-  (function() {
-    const toolName = 'inheritance'; // For inheritance tool use 'inheritance', for wasiyyah use 'wasiyyah'
-    const authKey = 'auth_' + toolName;
-    
-    window.addEventListener('DOMContentLoaded', function() {
-      const authDataStr = localStorage.getItem(authKey);
-      
-      if (!authDataStr) {
-        // Show warning banner for unauthorized access
-        const banner = document.createElement('div');
-        banner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#dc2626;color:white;padding:20px;text-align:center;z-index:99999;font-weight:bold;box-shadow:0 4px 6px rgba(0,0,0,0.1);';
-        banner.innerHTML = '⚠️ Unauthorized Access Detected - Please authenticate at <a href="https://islamistechnology.com" style="color:#fef08a;text-decoration:underline;font-weight:bold;">islamistechnology.com</a> to use this tool';
-        document.body.insertBefore(banner, document.body.firstChild);
-        
-        // Optionally blur the content
-        document.body.style.filter = 'blur(5px)';
-        document.body.style.pointerEvents = 'none';
-        banner.style.pointerEvents = 'auto';
-      } else {
-        try {
-          const authData = JSON.parse(authDataStr);
-          if (authData.expiryDate) {
-            const parts = authData.expiryDate.split('-');
-            const expiry = new Date(parts[2], parts[1] - 1, parts[0]);
-            expiry.setHours(23, 59, 59, 999);
-            const today = new Date();
-            
-            if (today > expiry) {
-              localStorage.removeItem(authKey);
-              alert('⏰ Your access expired on ' + authData.expiryDate + '. Please contact admin for renewal.');
-              window.location.href = 'https://islamistechnology.com';
-            }
-          }
-        } catch (e) {
-          console.error('Auth check error:', e);
-        }
-      }
-    });
-  })();
-</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Al-Farā’iḍ Calculator</title>
